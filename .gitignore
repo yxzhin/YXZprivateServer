@@ -4,4 +4,4 @@
 .htaccess
 /src/backend/checkForYXZPSupdates.php
 /src/backend/yxzps/lib/test.php
-#/src/backend/yxzps/config/connection.php
+/src/backend/yxzps/config/connection.php
