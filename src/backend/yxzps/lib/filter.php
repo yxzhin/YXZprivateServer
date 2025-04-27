@@ -2,37 +2,34 @@
 
 class Filter{
 
-    public function baseNotIssetOrEmptyCheck(array $vars, array $empty_check_exceptions=array()): bool {
+    public static function filterUserName(string $userName): bool {
 
-        foreach($vars as $k){
-            if(!isset($_POST[$k])
-            || empty($_POST[$k])
-            && !in_array($k, $empty_check_exceptions))
-            return 0;
-        }
-        
-        return 1;
+        $userName = strip_tags(trim($userName));
+
+        return !empty($userName)
+        && strlen($userName) >= 3
+        && strlen($userName) <= 15;
 
     }
 
-    public function containsSpecialChars(string $var, string $exceptions=""): int|bool {
+    public static function filterPassword(string $password): bool {
 
-        return preg_match("/[^A-Za-z0-9{$exceptions} ]/", $var);
+        $password = strip_tags(trim($password), ["_", "-"]);
+
+        return !empty($password)
+        && strlen($password) >= 6
+        && strlen($password) <= 20;
 
     }
 
-    public function checkSecret(string $secret, string $endpoint_name): bool {
+    public static function filterEmail(string $email): bool {
 
-        $secrets = array(
-            "registerGJAccount.php"=>"Wmfv3899gc9",
-        );
+        $email = strip_tags(trim($email), ["@", ".", "_", "-"]);
 
-        $target_secret = Utils::array_get($secrets, $endpoint_name);
-
-        if(empty($target_secret))
-        return 1;
-
-        return $secret === $target_secret;
+        return !empty($email)
+        && strlen($email) >= 5
+        && strlen($email) <= 50
+        && filter_var($email, FILTER_VALIDATE_EMAIL);
 
     }
 

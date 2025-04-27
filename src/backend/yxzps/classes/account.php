@@ -37,25 +37,10 @@ class Account{
 
     public static function register(string $userName, string $password, string $email): string|int {
 
-        if(strlen($userName) > 20)
-        return ERROR_USERNAME_TOO_LONG;
-
-        if(strlen($userName) < 3)
-        return ERROR_USERNAME_TOO_SHORT;
-
-        if(FILTER->containsSpecialChars($userName, "_\-"))
+        if(!FILTER::filterUserName($userName)
+        || !FILTER::filterPassword($password)
+        || !FILTER::filterEmail($email))
         return ERROR_GENERIC;
-
-        if(strlen($password) < 6)
-        return ERROR_PASSWORD_TOO_SHORT;
-
-        if(strlen($password) > 255)
-        return ERROR_PASSWORD_TOO_LONG;
-
-        if(strlen($email) < 5
-        || strlen($email) > 255
-        || !filter_var($email, FILTER_VALIDATE_EMAIL))
-        return ERROR_INVALID_EMAIL;
 
         if(DBManager::baseSelect(["count(*)"], "accounts", "userName", $userName) > 0)
         return ERROR_USERNAME_ALREADY_TAKEN;
