@@ -2,8 +2,8 @@
 
 class Cron{
 
-    public function createDefaultRoleIfNotExists(): bool {
-
+    public function createDefaultRoleIfNotExists(): string|bool {
+        
         return Role::create(DEFAULT_ROLE_ID, "Player");
 
     }
@@ -20,7 +20,7 @@ class Cron{
 
     }
 
-    public function perform(): bool {
+    public function perform(string $ip): bool {
 
         $path = __DIR__."/../data/cronlastrun.txt";
         if(!file_exists($path)) file_put_contents($path, "0");
@@ -29,11 +29,23 @@ class Cron{
         if(time() - $last_run_time < CRON_COOLDOWN)
         return 0;
 
-        $this->createDefaultRoleIfNotExists();
-        $this->createReuploadAccountIfNotExists();
+        $createDefaultRoleIfNotExists = $this->createDefaultRoleIfNotExists();
+        $createReuploadAccountIfNotExists = $this->createReuploadAccountIfNotExists();
 
         $last_run_time = time();
         file_put_contents($path, $last_run_time);
+
+        $attrs = json_encode([
+            "createDefaultRoleIfNotExists"=>$createDefaultRoleIfNotExists,
+            "createReuploadAccountIfNotExists"=>$createReuploadAccountIfNotExists,
+        ]);
+
+        DBManager::baseInsert([
+            "ip"=>$ip,
+            "type"=>LOG_CRON_DONE,
+            "attrs"=>$attrs,
+            "time"=>$last_run_time,
+        ], "logs");
 
         return 1;
 

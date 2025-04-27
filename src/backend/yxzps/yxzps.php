@@ -23,6 +23,6 @@ $ip = PROTECTOR->getIP();
 if(PROTECTOR->checkIfBanned(ip:$ip))
 die(MESSAGE_ERROR_IP_BANNED);
 
-CRON->perform();
+CRON->perform($ip);
 
 ?>
