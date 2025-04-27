@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Хост: localhost
--- Время создания: Апр 27 2025 г., 20:28
+-- Время создания: Апр 27 2025 г., 22:31
 -- Версия сервера: 8.0.26-17
 -- Версия PHP: 7.3.33
 
@@ -28,6 +28,7 @@ SET time_zone = "+00:00";
 --
 
 CREATE TABLE `accounts` (
+  `insertID` int NOT NULL,
   `accountID` int NOT NULL,
   `userName` varchar(20) NOT NULL,
   `gjp2` varchar(255) CHARACTER SET cp1251 COLLATE cp1251_general_ci NOT NULL,
@@ -108,9 +109,10 @@ CREATE TABLE `roles` (
 -- Индексы таблицы `accounts`
 --
 ALTER TABLE `accounts`
-  ADD PRIMARY KEY (`accountID`),
+  ADD PRIMARY KEY (`insertID`),
   ADD UNIQUE KEY `userName` (`userName`),
-  ADD UNIQUE KEY `email` (`email`);
+  ADD UNIQUE KEY `email` (`email`),
+  ADD UNIQUE KEY `accountID` (`accountID`);
 
 --
 -- Индексы таблицы `bans`
@@ -144,7 +146,7 @@ ALTER TABLE `roles`
 -- AUTO_INCREMENT для таблицы `accounts`
 --
 ALTER TABLE `accounts`
-  MODIFY `accountID` int NOT NULL AUTO_INCREMENT;
+  MODIFY `insertID` int NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT для таблицы `bans`
