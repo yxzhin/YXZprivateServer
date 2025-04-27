@@ -42,7 +42,6 @@ class Role{
             "roleID"=>$roleID,
             "display_name"=>$display_name,
         ]);
-        $time = time();
 
         DBManager::baseInsert([
             "roleID"=>$roleID,
@@ -55,12 +54,7 @@ class Role{
             "perms_dashboard"=>json_encode($perms_dashboard),
         ], "roles");
 
-        DBManager::baseInsert([
-            "ip"=>$ip,
-            "type"=>LOG_ROLE_CREATED,
-            "attrs"=>$attrs,
-            "time"=>$time,
-        ], "logs");
+        PROTECTOR::log_($ip, LOG_ROLE_CREATED, $attrs);
 
         return 1;
 

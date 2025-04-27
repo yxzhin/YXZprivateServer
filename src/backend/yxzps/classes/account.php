@@ -2,6 +2,7 @@
 
 class Account{
 
+    public int $insertID;
     public int $accountID;
     public string $userName;
     public string $gjp2;
@@ -21,6 +22,7 @@ class Account{
         if(empty($data))
         return ERROR_NOT_FOUND;
 
+        $this->insertID = $data["insertID"];
         $this->accountID = $accountID;
         $this->userName = $data["userName"];
         $this->gjp2 = $data["gjp2"];
@@ -63,11 +65,6 @@ class Account{
         $settings = json_encode(DEFAULT_SETTINGS);
         $roles = json_encode([DEFAULT_ROLE_ID]);
 
-        $attrs = json_encode([
-            "accountID"=>$accountID,
-            "userName"=>$userName,
-        ]);
-
         //боже как же это красиво, я выйду за эту функцию
         DBManager::baseInsert([
             "accountID"=>$accountID,
@@ -82,14 +79,46 @@ class Account{
             "roles"=>$roles,
         ], "accounts");
 
-        DBManager::baseInsert([
-            "ip"=>$ip,
-            "type"=>LOG_ACCOUNT_REGISTERED,
-            "attrs"=>$attrs,
-            "time"=>$time,
-        ], "logs");
+        $insertID = CONN->lastInsertId();
+
+        $attrs = json_encode([
+            "insertID"=>$insertID,
+            "accountID"=>$accountID,
+            "userName"=>$userName,
+        ]);
+
+        PROTECTOR->log_($ip, LOG_ACCOUNT_REGISTERED, $attrs);
 
         return $accountID;
+
+    }
+
+    public static function login(string $userName, string $gjp2): string {
+
+        if(!FILTER->filterUserName($userName))
+        return ERROR_GENERIC;
+
+        $ip = PROTECTOR->getIP();
+
+        $accountID = self::getAccountIDFromUserName($userName);
+
+        if(PROTECTOR->checkIfBanned(accountID:$accountID))
+        return ERROR_ACCOUNT_BANNED;
+
+        if(!PROTECTOR->checkGJP2($accountID, $gjp2, $ip))
+        return ERROR_NOT_FOUND;
+
+        $attrs = json_encode([
+            "accountID"=>$accountID,
+            "userName"=>$userName,
+        ]);
+
+        PROTECTOR->log_($ip, LOG_ACCOUNT_LOGIN, $attrs);
+
+        if(isset($_GET["json"]))
+        return JSONConnector::accountLogin($accountID);
+
+        return GDConnector::accountLogin($accountID);
 
     }
 
@@ -98,6 +127,12 @@ class Account{
         // @TODO
 
         return 1;
+
+    }
+
+    public static function getAccountIDFromUserName(string $userName): int {
+
+        return DBManager::baseSelect(["accountID"], "accounts", "userName", $userName);
 
     }
 

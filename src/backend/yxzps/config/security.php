@@ -13,4 +13,6 @@ define("GD_BINARY_VERSIONS", [44, 43, 42, 41, 40, 39, 38, 37, 36]);
 // will run cron once in given time in seconds (3600=one hour)
 define("CRON_COOLDOWN", 3600);
 
+define("MAX_LOGIN_ATTEMPTS_FROM_IP", 5);
+
 ?>
