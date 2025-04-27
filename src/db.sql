@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Хост: localhost
--- Время создания: Апр 26 2025 г., 21:36
+-- Время создания: Апр 27 2025 г., 20:28
 -- Версия сервера: 8.0.26-17
 -- Версия PHP: 7.3.33
 
@@ -78,8 +78,8 @@ CREATE TABLE `cache` (
 CREATE TABLE `logs` (
   `insertID` int NOT NULL,
   `ip` varchar(255) NOT NULL,
-  `type` tinyint NOT NULL,
-  `attrs` text NOT NULL,
+  `type` int NOT NULL,
+  `attrs` text CHARACTER SET cp1251 COLLATE cp1251_general_ci,
   `time` int NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=cp1251;
 
