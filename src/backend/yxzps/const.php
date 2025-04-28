@@ -4,14 +4,11 @@
 define("ERROR_GENERIC", "-1");
 define("ERROR_USERNAME_ALREADY_TAKEN", "-2");
 define("ERROR_EMAIL_ALREADY_TAKEN", "-3");
-define("ERROR_USERNAME_TOO_LONG", "-4");
-define("ERROR_PASSWORD_TOO_LONG", "-5");
-define("ERROR_INVALID_EMAIL", "-6");
-define("ERROR_PASSWORD_TOO_SHORT", "-8");
-define("ERROR_USERNAME_TOO_SHORT", "-9");
-define("ERROR_NOT_FOUND", "-11");
+define("ERROR_INVALID_CREDENTIALS", "-11");
 define("ERROR_ACCOUNT_BANNED", "-12");
+define("ERROR_NOT_FOUND", "-404");
 define("ERROR_ALREADY_TAKEN", "-100");
+define("ERROR_ACCOUNT_NOT_ACTIVE", "-101");
 
 // logs
 define("LOG_ACCOUNT_REGISTERED", 100000);

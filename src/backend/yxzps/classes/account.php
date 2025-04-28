@@ -93,7 +93,7 @@ class Account{
 
     }
 
-    public static function login(string $userName, string $gjp2): string {
+    public static function login(string $userName, string $gjp2): string|array {
 
         if(!FILTER->filterUserName($userName))
         return ERROR_GENERIC;
@@ -102,11 +102,23 @@ class Account{
 
         $accountID = self::getAccountIDFromUserName($userName);
 
-        if(PROTECTOR->checkIfBanned(accountID:$accountID))
-        return ERROR_ACCOUNT_BANNED;
+        if(!PROTECTOR->checkGJP2($accountID, $gjp2)){
 
-        if(!PROTECTOR->checkGJP2($accountID, $gjp2, $ip))
-        return ERROR_NOT_FOUND;
+            PROTECTOR->log_($ip, LOG_FAILED_LOGIN_ATTEMPT_FROM_IP);
+            
+            $login_attempts = PROTECTOR->getFailedLoginAttemptsFromIP($ip);
+
+            return array(ERROR_INVALID_CREDENTIALS, $login_attempts);
+
+        }
+
+        $ban = PROTECTOR->checkIfBanned(accountID:$accountID);
+
+        if($ban)
+        return array(ERROR_ACCOUNT_BANNED, $ban[0], $ban[1]);
+
+        if(!self::isActive($accountID))
+        return ERROR_ACCOUNT_NOT_ACTIVE;
 
         $attrs = json_encode([
             "accountID"=>$accountID,
@@ -115,10 +127,7 @@ class Account{
 
         PROTECTOR->log_($ip, LOG_ACCOUNT_LOGIN, $attrs);
 
-        if(isset($_GET["json"]))
-        return JSONConnector::accountLogin($accountID);
-
-        return GDConnector::accountLogin($accountID);
+        return $accountID;
 
     }
 
@@ -133,6 +142,12 @@ class Account{
     public static function getAccountIDFromUserName(string $userName): int {
 
         return DBManager::baseSelect(["accountID"], "accounts", "userName", $userName);
+
+    }
+
+    public static function isActive(int $accountID): bool {
+
+        return DBManager::baseSelect(["is_active"], "accounts", "accountID", $accountID);
 
     }
 

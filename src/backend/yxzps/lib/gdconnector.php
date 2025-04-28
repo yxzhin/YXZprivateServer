@@ -6,9 +6,24 @@
 
 class GDConnector{
 
-    public static function accountLogin(int $accountID): string {
+    public static function accountRegister(int|string $result): int|string {
 
-        return $accountID.",".$accountID;
+        if($result < 0)
+        return $result;
+
+        return "1";
+
+    }
+
+    public static function accountLogin(int|string|array $result): int|string {
+
+        if(is_array($result))
+        return $result[0];
+
+        if($result < 0)
+        return $result;
+
+        return $result.",".$result;
 
     }
 

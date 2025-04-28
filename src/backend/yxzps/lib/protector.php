@@ -45,13 +45,19 @@ class Protector{
 
     }
 
-    public static function checkIfBanned(int $accountID=0, string $ip=""): bool|array {
+    public static function getFailedLoginAttemptsFromIP(string $ip): int {
 
         $query = CONN->prepare("SELECT count(*) FROM logs WHERE ip = :ip AND type = :type");
         $query->execute([":ip"=>$ip, ":type"=>LOG_FAILED_LOGIN_ATTEMPT_FROM_IP]);
-        $login_attempts = $query->fetchColumn();
+        return $query->fetchColumn();
 
-        if($login_attempts > MAX_LOGIN_ATTEMPTS_FROM_IP)
+    }
+
+    public static function checkIfBanned(int $accountID=0, string $ip=""): bool|array {
+
+        $login_attempts = self::getFailedLoginAttemptsFromIP($ip);
+
+        if($login_attempts == MAX_LOGIN_ATTEMPTS_FROM_IP)
         // @TODO: temp bans
         return 1;
 
@@ -67,21 +73,12 @@ class Protector{
 
     }
 
-    public static function checkGJP2(int $accountID, string $gjp2, string $ip): bool {
+    public static function checkGJP2(int $accountID, string $gjp2): bool {
 
-        $data = DBManager::baseSelect(["is_active", "gjp2"], "accounts", "accountID", $accountID);
+        $target_gjp2 = DBManager::baseSelect(["gjp2"], "accounts", "accountID", $accountID);
 
-        if(!$data["is_active"])
+        if(!password_verify($gjp2, $target_gjp2))
         return 0;
-
-        $target_gjp2 = $data["gjp2"];
-
-        if(!password_verify($gjp2, $target_gjp2)){
-
-            self::log_($ip, LOG_FAILED_LOGIN_ATTEMPT_FROM_IP);
-            return 0;
-
-        }
 
         return 1;
 
