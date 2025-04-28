@@ -4,7 +4,7 @@ require_once __DIR__."/../yxzps/yxzps.php";
 
 if(!isset($_POST["secret"])
 || $_POST["secret"] !== "Wmfv3899gc9")
-die("-1");
+die(JSONConnector::errorGeneric());
 
 $result = Account::login($_POST["userName"] ?? "", $_POST["gjp2"] ?? "");
 

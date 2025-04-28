@@ -40,12 +40,7 @@ class Cron{
             "createReuploadAccountIfNotExists"=>$createReuploadAccountIfNotExists,
         ]);
 
-        DBManager::baseInsert([
-            "ip"=>$ip,
-            "type"=>LOG_CRON_DONE,
-            "attrs"=>$attrs,
-            "time"=>$last_run_time,
-        ], "logs");
+        PROTECTOR::log_($ip, LOG_CRON_DONE, $attrs, $last_run_time);
 
         return 1;
 

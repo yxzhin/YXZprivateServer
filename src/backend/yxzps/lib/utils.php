@@ -2,13 +2,23 @@
 
 class Utils{
 
-    public static function array_get(array $array, $key){
+    public static function arrayGet(array $array, $key){
 
         return array_key_exists($key, $array) ? $array[$key] : null;
 
     }
 
-    public static function debug_print_post(bool $write_to_temp=false){
+    public static function getErrorMessageFromErrorCode(string $code): string {
+
+        $constants = get_defined_constants();
+        $constant_name = array_search($code, $constants, true);
+        $error_message = constant("MESSAGE_".$constant_name);
+
+        return $error_message;
+
+    }
+
+    public static function debugPrintPost(bool $write_to_temp=false){
 
         $post = array();
         $path = __DIR__."/../temp";

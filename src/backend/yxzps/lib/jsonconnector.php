@@ -4,20 +4,41 @@
 
 class JSONConnector{
 
+    public static function baseJson(int $code, string $message, ?array $data=null): string {
+
+        header('Content-Type: application/json; charset=utf-8');
+
+        $json = [
+            "code"=>$code,
+            "message"=>$message,
+        ];
+
+        if($data) $json["data"] = $data;
+
+        return json_encode($json, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT);
+
+    }
+
+    public static function errorGeneric(): string {
+
+        return self::baseJson(ERROR_GENERIC, MESSAGE_ERROR_GENERIC);
+
+    }
+
+    public static function success(?array $data=null): string {
+
+        return self::baseJson(SUCCESS, MESSAGE_SUCCESS, $data);
+
+    }
+
     public static function accountRegister(int|string $result): string {
 
-        $message = Utils::array_get(MESSAGES, $result);
+        $message = Utils::getErrorMessageFromErrorCode($result);
 
         if(!$message)
-        return json_encode([
-            "code"=>1,
-            "message"=>"success",
-        ]);
+        return self::success();
 
-        return json_encode([
-            "code"=>(int)$result,
-            "message"=>$message,
-        ]);
+        return self::baseJson($result, $message);
 
     }
 
@@ -26,41 +47,26 @@ class JSONConnector{
         if(is_array($result)){
 
             if($result[0] == ERROR_ACCOUNT_BANNED)
-            return json_encode([
-                "code"=>$result[0],
-                "message"=>MESSAGE_ERROR_ACCOUNT_BANNED,
-                "data"=>[
-                    "ban_time"=>$result[1],
-                    "ban_ends_at"=>$result[2],
-                ],
+            return self::baseJson($result[0], MESSAGE_ERROR_ACCOUNT_BANNED, [
+                "ban_time"=>$result[1],
+                "ban_ends_at"=>$result[2],
             ]);
 
             if($result[0] == ERROR_INVALID_CREDENTIALS)
-            return json_encode([
-                "code"=>$result[0],
-                "message"=>MESSAGE_ERROR_INVALID_CREDENTIALS,
-                "data"=>[
-                    "login_attempts_from_ip_left"=>MAX_LOGIN_ATTEMPTS_FROM_IP-$result[1]+1,
-                ],
+            return self::baseJson($result[0], MESSAGE_ERROR_INVALID_CREDENTIALS, [
+                "login_attempts_from_ip_left"=>MAX_LOGIN_ATTEMPTS_FROM_IP-$result[1]+1,
             ]);
 
         }
 
-        $message = Utils::array_get(MESSAGES, $result);
+        $message = Utils::getErrorMessageFromErrorCode($result);
 
         if(!$message)
-        return json_encode([
-            "code"=>1,
-            "message"=>"success",
-            "data"=>[
-                "accountID"=>$result,
-            ],
+        return self::success([
+            "accountID"=>$result,
         ]);
 
-        return json_encode([
-            "code"=>(int)$result,
-            "message"=>$message,
-        ]);
+        return self::baseJson($result, $message);
 
     }
 

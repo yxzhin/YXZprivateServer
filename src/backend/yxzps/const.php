@@ -1,5 +1,7 @@
 <?php
 
+define("SUCCESS", 1);
+
 // errors
 define("ERROR_GENERIC", "-1");
 define("ERROR_USERNAME_ALREADY_TAKEN", "-2");
@@ -9,6 +11,7 @@ define("ERROR_ACCOUNT_BANNED", "-12");
 define("ERROR_NOT_FOUND", "-404");
 define("ERROR_ALREADY_TAKEN", "-100");
 define("ERROR_ACCOUNT_NOT_ACTIVE", "-101");
+define("ERROR_IP_BANNED", "-102");
 
 // logs
 define("LOG_ACCOUNT_REGISTERED", 100000);

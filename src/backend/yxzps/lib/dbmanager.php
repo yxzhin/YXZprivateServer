@@ -35,7 +35,7 @@ class DBManager{
         $query->execute([":{$var2}"=>$value]);
 
         if(count($vars) > 1
-        && $vars[0] != "*")
+        || $vars[0] == "*")
         return $query->fetch();
 
         return $query->fetchColumn();

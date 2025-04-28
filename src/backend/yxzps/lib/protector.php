@@ -84,6 +84,15 @@ class Protector{
 
     }
 
+    public static function checkGameAndBinaryVersion(): bool {
+
+        return isset($_POST["gameVersion"])
+        && $_POST["gameVersion"] == GMD_VERSION
+        && isset($_POST["binaryVersion"])
+        && in_array($_POST["binaryVersion"], GD_BINARY_VERSIONS);
+
+    }
+
 }
 
 ?>

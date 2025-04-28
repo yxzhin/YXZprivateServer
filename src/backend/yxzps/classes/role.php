@@ -37,7 +37,7 @@ class Role{
         if(DBManager::baseSelect(["count(*)"], "roles", "roleID", $roleID))
         return ERROR_ALREADY_TAKEN;
 
-        $ip = PROTECTOR->getIP();
+        $ip = PROTECTOR::getIP();
         $attrs = json_encode([
             "roleID"=>$roleID,
             "display_name"=>$display_name,
