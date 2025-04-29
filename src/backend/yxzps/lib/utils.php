@@ -8,6 +8,28 @@ class Utils{
 
     }
 
+    public static function getReadableTimeDifferenceFromUnixTimestamp(int $time): string {
+        
+        $now = new DateTime();
+
+        $old = new DateTime();
+        $old->setTimestamp($time);
+
+        $delta = $now->diff($old);
+
+        $years = $delta->y > 0 ? $delta->y." years, " : "";
+        $months = $delta->m > 0 ? $delta->m." months, " : "";
+        $days = $delta->d > 0 ? $delta->d." days, " : "";
+        $hours = $delta->h > 0 ? $delta->h." hours, " : "";
+        $minutes = $delta->i > 0 ? $delta->i." minutes, " : "";
+        $seconds = $delta->s." seconds ";
+
+        $diff = $years.$months.$days.$hours.$minutes.$seconds."ago";
+
+        return $diff;
+
+    }
+
     public static function getErrorMessageFromErrorCode(string $code): ?string {
 
         $constants = get_defined_constants();

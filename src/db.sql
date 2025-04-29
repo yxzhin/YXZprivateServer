@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Хост: localhost
--- Время создания: Апр 29 2025 г., 17:35
+-- Время создания: Апр 29 2025 г., 22:25
 -- Версия сервера: 8.0.26-17
 -- Версия PHP: 7.3.33
 
@@ -34,6 +34,7 @@ CREATE TABLE `accounts` (
   `gjp2` varchar(255) CHARACTER SET cp1251 COLLATE cp1251_general_ci NOT NULL,
   `email` varchar(255) NOT NULL,
   `ip` varchar(255) NOT NULL,
+  `clanID` int DEFAULT NULL,
   `time` int NOT NULL,
   `is_active` tinyint(1) NOT NULL DEFAULT '0',
   `stats` text NOT NULL,
@@ -60,6 +61,19 @@ CREATE TABLE `bans` (
 -- --------------------------------------------------------
 
 --
+-- Структура таблицы `blocks`
+--
+
+CREATE TABLE `blocks` (
+  `insertID` int NOT NULL,
+  `accountID` int NOT NULL,
+  `target_accountID` int NOT NULL,
+  `time` int NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=cp1251;
+
+-- --------------------------------------------------------
+
+--
 -- Структура таблицы `cache`
 --
 
@@ -79,11 +93,38 @@ CREATE TABLE `cache` (
 CREATE TABLE `clans` (
   `insertID` int NOT NULL,
   `clanID` int NOT NULL,
-  `clanName` varchar(20) NOT NULL,
-  `clanTag` varchar(7) NOT NULL,
-  `members` text CHARACTER SET cp1251 COLLATE cp1251_general_ci,
+  `clan_name` varchar(20) CHARACTER SET cp1251 COLLATE cp1251_general_ci NOT NULL,
+  `clan_tag` varchar(7) CHARACTER SET cp1251 COLLATE cp1251_general_ci NOT NULL,
   `ownerID` int NOT NULL,
   `levels` text,
+  `time` int NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=cp1251;
+
+-- --------------------------------------------------------
+
+--
+-- Структура таблицы `friendRequests`
+--
+
+CREATE TABLE `friendRequests` (
+  `insertID` int NOT NULL,
+  `accountID` int NOT NULL,
+  `target_accountID` int NOT NULL,
+  `message` varchar(255) NOT NULL,
+  `time` int NOT NULL,
+  `is_new` tinyint(1) NOT NULL DEFAULT '1'
+) ENGINE=InnoDB DEFAULT CHARSET=cp1251;
+
+-- --------------------------------------------------------
+
+--
+-- Структура таблицы `friends`
+--
+
+CREATE TABLE `friends` (
+  `insertID` int NOT NULL,
+  `accountID1` int NOT NULL,
+  `accountID2` int NOT NULL,
   `time` int NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=cp1251;
 
@@ -138,6 +179,12 @@ ALTER TABLE `bans`
   ADD PRIMARY KEY (`insertID`);
 
 --
+-- Индексы таблицы `blocks`
+--
+ALTER TABLE `blocks`
+  ADD PRIMARY KEY (`insertID`);
+
+--
 -- Индексы таблицы `cache`
 --
 ALTER TABLE `cache`
@@ -149,9 +196,21 @@ ALTER TABLE `cache`
 ALTER TABLE `clans`
   ADD PRIMARY KEY (`insertID`),
   ADD UNIQUE KEY `clanID` (`clanID`),
-  ADD UNIQUE KEY `clanName` (`clanName`),
-  ADD UNIQUE KEY `clanTag` (`clanTag`),
+  ADD UNIQUE KEY `clanName` (`clan_name`),
+  ADD UNIQUE KEY `clanTag` (`clan_tag`),
   ADD UNIQUE KEY `ownerID` (`ownerID`);
+
+--
+-- Индексы таблицы `friendRequests`
+--
+ALTER TABLE `friendRequests`
+  ADD PRIMARY KEY (`insertID`);
+
+--
+-- Индексы таблицы `friends`
+--
+ALTER TABLE `friends`
+  ADD PRIMARY KEY (`insertID`);
 
 --
 -- Индексы таблицы `logs`
@@ -163,7 +222,8 @@ ALTER TABLE `logs`
 -- Индексы таблицы `roles`
 --
 ALTER TABLE `roles`
-  ADD PRIMARY KEY (`roleID`);
+  ADD PRIMARY KEY (`roleID`),
+  ADD UNIQUE KEY `priority` (`priority`);
 
 --
 -- AUTO_INCREMENT для сохранённых таблиц
@@ -182,6 +242,12 @@ ALTER TABLE `bans`
   MODIFY `insertID` int NOT NULL AUTO_INCREMENT;
 
 --
+-- AUTO_INCREMENT для таблицы `blocks`
+--
+ALTER TABLE `blocks`
+  MODIFY `insertID` int NOT NULL AUTO_INCREMENT;
+
+--
 -- AUTO_INCREMENT для таблицы `cache`
 --
 ALTER TABLE `cache`
@@ -191,6 +257,18 @@ ALTER TABLE `cache`
 -- AUTO_INCREMENT для таблицы `clans`
 --
 ALTER TABLE `clans`
+  MODIFY `insertID` int NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT для таблицы `friendRequests`
+--
+ALTER TABLE `friendRequests`
+  MODIFY `insertID` int NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT для таблицы `friends`
+--
+ALTER TABLE `friends`
   MODIFY `insertID` int NOT NULL AUTO_INCREMENT;
 
 --

@@ -15,8 +15,18 @@ class Role{
         
         $data = DBManager::baseSelect(["*"], "roles", "roleID", $roleID);
 
-        if(empty($data))
-        return ERROR_NOT_FOUND;
+        if(empty($data)){
+
+            if($roleID == DEFAULT_ROLE_ID){
+                
+                CRON->createDefaultRoleIfNotExists();
+                return SUCCESS;
+
+            }
+
+            return ERROR_NOT_FOUND;
+
+        }
 
         $this->roleID = $data["roleID"];
         $this->display_name = $data["display_name"];

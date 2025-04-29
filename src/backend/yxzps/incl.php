@@ -7,6 +7,7 @@ require_once __DIR__."/config/connection.php";
 require_once __DIR__."/config/dashboard.php";
 require_once __DIR__."/config/discord.php";
 require_once __DIR__."/config/mail.php";
+require_once __DIR__."/config/misc.php";
 require_once __DIR__."/config/security.php";
 
 require_once __DIR__."/lang/".LANG.".php";
@@ -21,6 +22,7 @@ require_once __DIR__."/lib/protector.php";
 require_once __DIR__."/lib/utils.php";
 
 require_once __DIR__."/classes/account.php";
+require_once __DIR__."/classes/clan.php";
 require_once __DIR__."/classes/role.php";
 
 ?>

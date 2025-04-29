@@ -8,6 +8,7 @@ class Account{
     public string $gjp2;
     public string $email;
     public string $ip;
+    public ?int $clanID;
     public int $time;
     public bool $is_active;
     public array $stats;
@@ -28,6 +29,7 @@ class Account{
         $this->gjp2 = $data["gjp2"];
         $this->email = $data["email"];
         $this->ip = $data["ip"];
+        $this->clanID = $data["clanID"];
         $this->time = $data["time"];
         $this->is_active = $data["is_active"];
         $this->stats = json_decode($data["stats"], true);
@@ -151,6 +153,78 @@ class Account{
 
 
         return 1;
+
+    }
+
+    public function getRank(int $type=1 //1=global/top100, 2=friends, 3=creators
+        ): int {
+
+        if($type == 1){
+
+            $stars = $this->stats["stars"];
+            $moons = $this->stats["moons"];
+
+            $ranking_type_stars = "JSON_EXTRACT(stats, \"$.stars\")";
+            $ranking_type_moons = "JSON_EXTRACT(stats, \"$.moons\")";
+
+            switch(LEADERBOARD_RANKING_TYPE){
+
+                case 2: $ranking_type = $ranking_type_stars; $value = $stars; break;
+                case 3: $ranking_type = $ranking_type_moons; $value = $moons; break;
+                default: $ranking_type = $ranking_type_stars." + ".$ranking_type_moons;
+                $value = $stars + $moons; break;
+        
+            }
+
+            $sql = "SELECT count(*) FROM accounts
+            WHERE {$ranking_type} > :value
+            AND is_active = 1";
+
+        }
+
+        $query = CONN->prepare($sql);
+        $query->execute([":value"=>$value]);
+        $rank = $query->fetchColumn()+1;
+
+        return $rank;
+
+    }
+
+    public function getHighestRole(): Role {
+        
+        $highest_role = new Role();
+        $highest_role->load(DEFAULT_ROLE_ID);
+
+        foreach($this->roles as $roleID){
+
+            if($roleID == DEFAULT_ROLE_ID)
+            continue;
+
+            $role = new Role();
+            $role->load($roleID);
+
+            if(!isset($role->roleID))
+            continue;
+
+            if($role->priority > $highest_role->priority)
+            $highest_role->load($roleID);
+
+        }
+
+        return $highest_role;
+
+    }
+
+    public function getPrefixedUserName(): string {
+
+        $highest_role = $this->getHighestRole();
+        $role_prefix = !empty($highest_role->display_name) ? " [".$highest_role->display_name."]" : "";
+
+        $clan = new Clan();
+        $clan->load($this->clanID);
+        $clan_prefix = isset($clan->clan_tag) ? "[".$clan->clan_tag."] " : "";
+
+        return $clan_prefix.$this->userName.$role_prefix;
 
     }
 

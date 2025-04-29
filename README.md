@@ -3,7 +3,7 @@ yet another implementation of private geometry dash server emulator
 
 ### warning: hard beta; still in development
 - currently only gmd 2.2 is supported
-- tested on php 7.3
+- tested on php 8.3
 - yeah
 
 ## setup

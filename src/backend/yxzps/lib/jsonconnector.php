@@ -31,9 +31,9 @@ class JSONConnector{
 
     }
 
-    public static function notFound(): string {
+    public static function notFound(?array $data=null): string {
 
-        return self::baseJson(ERROR_NOT_FOUND, MESSAGE_ERROR_NOT_FOUND);
+        return self::baseJson(ERROR_NOT_FOUND, MESSAGE_ERROR_NOT_FOUND, $data);
 
     }
 
@@ -78,13 +78,13 @@ class JSONConnector{
 
     public static function getAccountInfo(Account $account, bool $me): string {
 
-        if(!$account->accountID)
-        return self::notFound();
+        if(!isset($account->accountID))
+        return self::notFound(["accountID"=>null]);
 
         $data = [
-            "rank"=>2147483647, //@TODO: ranking
-            "userName"=>$account->userName,
-            "registration_time"=>$account->time,
+            "rank"=>$account->getRank(),
+            "userName"=>$account->getPrefixedUserName(),
+            "registration_time"=>Utils::getReadableTimeDifferenceFromUnixTimestamp($account->time),
             "stats"=>$account->stats,
             "icons"=>$account->icons,
             "settings"=>$account->settings,

@@ -30,12 +30,12 @@ class GDConnector{
     public static function getAccountInfo(Account $account, bool $me): string {
 
         $data = [
-            $account->userName,
+            $account->getPrefixedUserName(),
             $account->accountID,
             $account->stats["stars"],
             $account->stats["demons"],
             "0", //5
-            "2147483647", //@TODO: ranking
+            $account->getRank(),
             $account->accountID,
             $account->stats["creatorpoints"],
             $account->icons["icon"],
@@ -59,7 +59,7 @@ class GDConnector{
             "0", //27
             $account->icons["accGlow"],
             "1", //29
-            "2147483647", // @TODO: ranking
+            $account->getRank(), // @TODO: ranking
             "0", //31
             "0", //32
             "0", //33
