@@ -19,15 +19,21 @@ class JSONConnector{
 
     }
 
+    public static function success(?array $data=null): string {
+
+        return self::baseJson(SUCCESS, MESSAGE_SUCCESS, $data);
+
+    }
+
     public static function errorGeneric(): string {
 
         return self::baseJson(ERROR_GENERIC, MESSAGE_ERROR_GENERIC);
 
     }
 
-    public static function success(?array $data=null): string {
+    public static function notFound(): string {
 
-        return self::baseJson(SUCCESS, MESSAGE_SUCCESS, $data);
+        return self::baseJson(ERROR_NOT_FOUND, MESSAGE_ERROR_NOT_FOUND);
 
     }
 
@@ -67,6 +73,33 @@ class JSONConnector{
         ]);
 
         return self::baseJson($result, $message);
+
+    }
+
+    public static function getAccountInfo(Account $account, bool $me): string {
+
+        if(!$account->accountID)
+        return self::notFound();
+
+        $data = [
+            "rank"=>2147483647, //@TODO: ranking
+            "userName"=>$account->userName,
+            "registration_time"=>$account->time,
+            "stats"=>$account->stats,
+            "icons"=>$account->icons,
+            "settings"=>$account->settings,
+            "roles"=>$account->roles,
+        ];
+
+        if($me){
+
+            $data["new_messages_count"] = 2147483647; // @TODO: messages
+            $data["new_friend_requests_count"] = 2147483647; // @TODO: friendRequests
+            $data["new_friends_count"] = 2147483647; // @TODO: newFriends
+
+        }
+
+        return self::success($data);
 
     }
 

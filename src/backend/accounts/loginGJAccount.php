@@ -4,13 +4,15 @@ require_once __DIR__."/../yxzps/yxzps.php";
 
 if(!isset($_POST["secret"])
 || $_POST["secret"] !== "Wmfv3899gc9")
-die(JSONConnector::errorGeneric());
+die(JSON ?
+JSONConnector::errorGeneric() :
+ERROR_GENERIC);
 
-$result = Account::login($_POST["userName"] ?? "", $_POST["gjp2"] ?? "");
+$account = new Account();
+$result = $account->login(userName:$_POST["userName"] ?? "", gjp2:$_POST["gjp2"] ?? "");
 
-if(isset($_GET["json"]))
-die(JSONConnector::accountLogin($result));
-
-echo GDConnector::accountLogin($result);
+die(JSON ?
+JSONConnector::accountLogin($result) :
+GDConnector::accountLogin($result));
 
 ?>

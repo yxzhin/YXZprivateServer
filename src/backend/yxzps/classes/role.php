@@ -11,7 +11,7 @@ class Role{
     public string $perms_actions;
     public string $perms_dashboard;
 
-    function __construct(int $roleID){
+    public function load(int $roleID): string|bool{
         
         $data = DBManager::baseSelect(["*"], "roles", "roleID", $roleID);
 
@@ -27,6 +27,8 @@ class Role{
         $this->perms_actions = $data["perms_actions"];
         $this->perms_dashboard = $data["perms_dashboard"];
 
+        return SUCCESS;
+
     }
 
     public static function create(int $roleID, ?string $display_name=null, int $priority=0,
@@ -37,7 +39,6 @@ class Role{
         if(DBManager::baseSelect(["count(*)"], "roles", "roleID", $roleID))
         return ERROR_ALREADY_TAKEN;
 
-        $ip = PROTECTOR::getIP();
         $attrs = json_encode([
             "roleID"=>$roleID,
             "display_name"=>$display_name,
@@ -54,7 +55,7 @@ class Role{
             "perms_dashboard"=>json_encode($perms_dashboard),
         ], "roles");
 
-        PROTECTOR::log_($ip, LOG_ROLE_CREATED, $attrs);
+        PROTECTOR::log_(LOG_ROLE_CREATED, $attrs);
 
         return 1;
 

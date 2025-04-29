@@ -10,7 +10,7 @@ class Cron{
 
     public function createReuploadAccountIfNotExists(): int|bool {
 
-        $password = (string)rand(100000,999999);
+        $password = (string)random_int(100000,999999);
         $email = $password."@reupload.yxzps";
         $accountID = Account::register("Reupload", $password, $email);
 
@@ -20,7 +20,7 @@ class Cron{
 
     }
 
-    public function perform(string $ip): bool {
+    public function perform(): bool {
 
         $path = __DIR__."/../data/cronlastrun.txt";
         if(!file_exists($path)) file_put_contents($path, "0");
@@ -40,7 +40,7 @@ class Cron{
             "createReuploadAccountIfNotExists"=>$createReuploadAccountIfNotExists,
         ]);
 
-        PROTECTOR::log_($ip, LOG_CRON_DONE, $attrs, $last_run_time);
+        PROTECTOR::log_(LOG_CRON_DONE, $attrs, $last_run_time);
 
         return 1;
 

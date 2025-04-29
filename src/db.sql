@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Хост: localhost
--- Время создания: Апр 27 2025 г., 22:31
+-- Время создания: Апр 29 2025 г., 17:35
 -- Версия сервера: 8.0.26-17
 -- Версия PHP: 7.3.33
 
@@ -73,6 +73,23 @@ CREATE TABLE `cache` (
 -- --------------------------------------------------------
 
 --
+-- Структура таблицы `clans`
+--
+
+CREATE TABLE `clans` (
+  `insertID` int NOT NULL,
+  `clanID` int NOT NULL,
+  `clanName` varchar(20) NOT NULL,
+  `clanTag` varchar(7) NOT NULL,
+  `members` text CHARACTER SET cp1251 COLLATE cp1251_general_ci,
+  `ownerID` int NOT NULL,
+  `levels` text,
+  `time` int NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=cp1251;
+
+-- --------------------------------------------------------
+
+--
 -- Структура таблицы `logs`
 --
 
@@ -127,6 +144,16 @@ ALTER TABLE `cache`
   ADD PRIMARY KEY (`insertID`);
 
 --
+-- Индексы таблицы `clans`
+--
+ALTER TABLE `clans`
+  ADD PRIMARY KEY (`insertID`),
+  ADD UNIQUE KEY `clanID` (`clanID`),
+  ADD UNIQUE KEY `clanName` (`clanName`),
+  ADD UNIQUE KEY `clanTag` (`clanTag`),
+  ADD UNIQUE KEY `ownerID` (`ownerID`);
+
+--
 -- Индексы таблицы `logs`
 --
 ALTER TABLE `logs`
@@ -158,6 +185,12 @@ ALTER TABLE `bans`
 -- AUTO_INCREMENT для таблицы `cache`
 --
 ALTER TABLE `cache`
+  MODIFY `insertID` int NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT для таблицы `clans`
+--
+ALTER TABLE `clans`
   MODIFY `insertID` int NOT NULL AUTO_INCREMENT;
 
 --

@@ -11,7 +11,7 @@ class Clan{
     public ?array $levels;
     public int $time;
 
-    function __construct(int $clanID){
+    public function load(int $clanID){
         
         $data = DBManager::baseSelect(["*"], "clans", "clanID", $clanID);
 
@@ -26,6 +26,8 @@ class Clan{
         $this->ownerID = $data["ownerID"];
         $this->levels = $data["levels"];
         $this->time = $data["time"];
+
+        return SUCCESS;
 
     }
 

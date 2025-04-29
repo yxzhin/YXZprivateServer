@@ -8,7 +8,7 @@ yet another implementation of private geometry dash server emulator
 
 ## setup
 - upload everything from `src\backend` to the webserver
-- import `src/db.sql` into the mysql database
+- import `src\db.sql` into the mysql database
 - edit `geometrydash.exe` and change the links
 
 ## updating

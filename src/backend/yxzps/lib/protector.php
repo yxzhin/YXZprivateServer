@@ -32,9 +32,10 @@ class Protector{
 
     }
 
-    public static function log_(string $ip, int $type, ?string $attrs=null, ?int $time=null){
+    public static function log_(int $type, ?string $attrs=null, ?int $time=null, ?string $ip=null){
 
         if(!$time) $time = time();
+        if(!$ip) $ip = IP;
 
         DBManager::baseInsert([
             "ip"=>$ip,
@@ -45,17 +46,17 @@ class Protector{
 
     }
 
-    public static function getFailedLoginAttemptsFromIP(string $ip): int {
+    public static function getFailedLoginAttempts(): int {
 
         $query = CONN->prepare("SELECT count(*) FROM logs WHERE ip = :ip AND type = :type");
-        $query->execute([":ip"=>$ip, ":type"=>LOG_FAILED_LOGIN_ATTEMPT_FROM_IP]);
+        $query->execute([":ip"=>IP, ":type"=>LOG_FAILED_LOGIN_ATTEMPT_FROM_IP]);
         return $query->fetchColumn();
 
     }
 
     public static function checkIfBanned(int $accountID=0, string $ip=""): bool|array {
 
-        $login_attempts = self::getFailedLoginAttemptsFromIP($ip);
+        $login_attempts = self::getFailedLoginAttempts();
 
         if($login_attempts == MAX_LOGIN_ATTEMPTS_FROM_IP)
         // @TODO: temp bans

@@ -11,11 +11,12 @@ require_once __DIR__."/incl.php";
 
 define("CONN", DBManager::connect(DB_HOST, DB_PORT, DB_NAME, DB_USER, DB_PASS));
 define("CRON", new Cron());
+define("IP", PROTECTOR::getIP());
+define("JSON", isset($_GET["json"]));
 
-$ip = PROTECTOR::getIP();
-if(PROTECTOR::checkIfBanned(ip:$ip))
+if(PROTECTOR::checkIfBanned(ip:IP))
 die(JSONConnector::baseJson(ERROR_IP_BANNED, MESSAGE_ERROR_IP_BANNED));
 
-CRON->perform($ip);
+CRON->perform();
 
 ?>

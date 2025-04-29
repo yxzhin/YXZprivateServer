@@ -15,7 +15,7 @@ class Account{
     public array $settings;
     public array $roles;
 
-    function __construct(int $accountID){
+    public function load(int $accountID): string|bool {
 
         $data = DBManager::baseSelect(["*"], "accounts", "accountID", $accountID);
 
@@ -35,73 +35,8 @@ class Account{
         $this->settings = json_decode($data["settings"], true);
         $this->roles = json_decode($data["roles"], true);
 
-    }
+        return SUCCESS;
 
-    public function getAccountString(){
-
-        $data = [
-            $this->userName,
-            $this->accountID,
-            $this->stats["stars"],
-            $this->stats["demons"],
-            "2147483647", //@TODO: ranking
-            $this->accountID,
-            $this->stats["creatorpoints"],
-            $this->icons["icon"],
-            $this->icons["color1"],
-            $this->icons["color2"],
-            $this->stats["coins"],
-            $this->icons["iconType"],
-            $this->icons["special"],
-            $this->accountID,
-            $this->stats["userCoins"],
-            $this->settings["mS"],
-            $this->settings["frS"],
-            $this->settings["yt"],
-            $this->icons["accIcon"],
-            $this->icons["accShip"],
-            $this->icons["accBall"],
-            $this->icons["accBird"],
-            $this->icons["accDart"],
-            $this->icons["accRobot"],
-            "0",
-            $this->icons["accGlow"],
-            "1",
-            "2147483647", // @TODO: ranking
-            "0", // @TODO: friendstate
-            "2147483647", // @TODO: messages
-            "2147483647", // @TODO: friendRequests
-            "2147483647", // @TODO: newFriends
-            "0", // @TODO: NewFriendRequest
-            "0",
-            $this->icons["accSpider"],
-            $this->settings["twitter"],
-            $this->settings["twitch"],
-            $this->stats["diamonds"],
-            $this->icons["accExplosion"],
-            "2", // @TODO: modLevel
-            $this->settings["cS"],
-            $this->icons["color3"],
-            $this->stats["moons"],
-            $this->icons["accSwing"],
-            $this->icons["accJetpack"],
-            "7,3,7,3,7,3,7,3,7,3,7,3", // @TODO: demons
-            "7,3,7,3,7,3,7,3", // @TODO: classicLevels
-            "7,3,7,3,7,3", // @TODO: platformerLevels
-        ];
-
-        $account_string = "";
-
-        for($x = 0; $x < count($data); ++$x){
-
-            $account_string .= $x.":".$data[$x];
-
-            if($x < count($data)-1) $account_string .= ":";
-
-        }
-
-        return $account_string;
-        
     }
 
     public static function register(string $userName, string $password, string $email): string|int {
@@ -117,16 +52,9 @@ class Account{
         if(DBManager::baseSelect(["count(*)"], "accounts", "email", $email) > 0)
         return ERROR_EMAIL_ALREADY_TAKEN;
 
-        while(true){
-            $accountID = rand(1000000, 9999999);
-            if(empty(DBManager::baseSelect(["count(*)"], "accounts", "accountID", $accountID)))
-            break;
-        }
-
+        $accountID = random_int(100000000, 999999999);
         $gjp2 = password_hash(ENCRYPTOR::generateGJP2($password), PASSWORD_BCRYPT);
-        $ip = PROTECTOR::getIP();
         $time = time();
-
         $stats = json_encode(DEFAULT_STATS);
         $icons = json_encode(DEFAULT_ICONS);
         $settings = json_encode(DEFAULT_SETTINGS);
@@ -138,7 +66,7 @@ class Account{
             "userName"=>$userName,
             "gjp2"=>$gjp2,
             "email"=>$email,
-            "ip"=>$ip,
+            "ip"=>IP,
             "time"=>$time,
             "stats"=>$stats,
             "icons"=>$icons,
@@ -154,26 +82,35 @@ class Account{
             "userName"=>$userName,
         ]);
 
-        PROTECTOR::log_($ip, LOG_ACCOUNT_REGISTERED, $attrs);
+        PROTECTOR::log_(LOG_ACCOUNT_REGISTERED, $attrs);
 
         return $accountID;
 
     }
 
-    public static function login(string $userName, string $gjp2): string|array {
+    public static function login(string $gjp2, ?string $userName=null,
+        ?int $accountID=null, bool $return_success=false): string|array {
 
-        if(!FILTER::filterUserName($userName))
+        if(empty($userName)
+        && empty($accountID))
         return ERROR_GENERIC;
 
-        $ip = PROTECTOR::getIP();
+        if(!empty($userName)
+        && !FILTER::filterUserName($userName))
+        return ERROR_GENERIC;
 
-        $accountID = self::getAccountIDFromUserName($userName);
+        if(!empty($accountID)
+        && !filter_var($accountID, FILTER_VALIDATE_INT))
+        return ERROR_GENERIC;
+
+        if(empty($accountID))
+        $accountID = DBManager::baseSelect(["accountID"], "accounts", "userName", $userName);
 
         if(!PROTECTOR::checkGJP2($accountID, $gjp2)){
 
-            PROTECTOR::log_($ip, LOG_FAILED_LOGIN_ATTEMPT_FROM_IP);
+            PROTECTOR::log_(LOG_FAILED_LOGIN_ATTEMPT_FROM_IP);
             
-            $login_attempts = PROTECTOR::getFailedLoginAttemptsFromIP($ip);
+            $login_attempts = PROTECTOR::getFailedLoginAttempts();
 
             return array(ERROR_INVALID_CREDENTIALS, $login_attempts);
 
@@ -184,17 +121,26 @@ class Account{
         if($ban)
         return array(ERROR_ACCOUNT_BANNED, $ban[0], $ban[1]);
 
-        if(!self::isActive($accountID))
+        $is_active = DBManager::baseSelect(["is_active"], "accounts", "accountID", $accountID);
+        
+        if(!$is_active)
         return ERROR_ACCOUNT_NOT_ACTIVE;
+
+        $userNamePassed = !empty($userName);
+        $userName = DBManager::baseSelect(["userName"], "accounts", "accountID", $accountID);
 
         $attrs = json_encode([
             "accountID"=>$accountID,
             "userName"=>$userName,
         ]);
 
-        PROTECTOR::log_($ip, LOG_ACCOUNT_LOGIN, $attrs);
+        if(DEBUG_MODE)
+        PROTECTOR::log_(LOG_ACCOUNT_LOGIN, $attrs);
 
-        return $accountID;
+        if($return_success)
+        return SUCCESS;
+
+        return $userNamePassed ? $accountID : $userName;
 
     }
 
@@ -202,19 +148,9 @@ class Account{
 
         // @TODO
 
+
+
         return 1;
-
-    }
-
-    public static function getAccountIDFromUserName(string $userName): int {
-
-        return DBManager::baseSelect(["accountID"], "accounts", "userName", $userName);
-
-    }
-
-    public static function isActive(int $accountID): bool {
-
-        return DBManager::baseSelect(["is_active"], "accounts", "accountID", $accountID);
 
     }
 

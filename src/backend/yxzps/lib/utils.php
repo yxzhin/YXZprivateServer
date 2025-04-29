@@ -8,10 +8,14 @@ class Utils{
 
     }
 
-    public static function getErrorMessageFromErrorCode(string $code): string {
+    public static function getErrorMessageFromErrorCode(string $code): ?string {
 
         $constants = get_defined_constants();
         $constant_name = array_search($code, $constants, true);
+
+        if(!$constant_name)
+        return null;
+
         $error_message = constant("MESSAGE_".$constant_name);
 
         return $error_message;
