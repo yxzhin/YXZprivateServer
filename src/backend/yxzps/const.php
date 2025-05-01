@@ -12,6 +12,7 @@ define("ERROR_NOT_FOUND", "-404");
 define("ERROR_ALREADY_TAKEN", "-100");
 define("ERROR_ACCOUNT_NOT_ACTIVE", "-101");
 define("ERROR_IP_BANNED", "-102");
+define("ERROR_ACCOUNT_LIMIT_PER_IP_REACHED", "-103");
 
 // logs
 define("LOG_ACCOUNT_REGISTERED", 100000);

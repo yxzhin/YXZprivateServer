@@ -74,23 +74,12 @@ class Protector{
 
     }
 
-    public static function checkGJP2(int $accountID, string $gjp2): bool {
-
-        $target_gjp2 = DBManager::baseSelect(["gjp2"], "accounts", "accountID", $accountID);
-
-        if(!password_verify($gjp2, $target_gjp2))
-        return 0;
-
-        return 1;
-
-    }
-
     public static function checkGameAndBinaryVersion(): bool {
 
         return isset($_POST["gameVersion"])
         && $_POST["gameVersion"] == GMD_VERSION
         && isset($_POST["binaryVersion"])
-        && in_array($_POST["binaryVersion"], GD_BINARY_VERSIONS);
+        && in_array($_POST["binaryVersion"], GMD_BINARY_VERSIONS);
 
     }
 

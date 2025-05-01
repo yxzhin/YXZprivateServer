@@ -18,8 +18,8 @@ class Role{
         if(empty($data)){
 
             if($roleID == DEFAULT_ROLE_ID){
-                
-                CRON->createDefaultRoleIfNotExists();
+
+                Cron::createDefaultRoleIfNotExists();
                 return SUCCESS;
 
             }
@@ -65,7 +65,7 @@ class Role{
             "perms_dashboard"=>json_encode($perms_dashboard),
         ], "roles");
 
-        PROTECTOR::log_(LOG_ROLE_CREATED, $attrs);
+        Protector::log_(LOG_ROLE_CREATED, $attrs);
 
         return 1;
 

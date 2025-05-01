@@ -23,6 +23,9 @@ require_once __DIR__."/lib/utils.php";
 
 require_once __DIR__."/classes/account.php";
 require_once __DIR__."/classes/clan.php";
+require_once __DIR__."/classes/comment.php";
+require_once __DIR__."/classes/friendrequest.php";
+require_once __DIR__."/classes/message.php";
 require_once __DIR__."/classes/role.php";
 
 ?>

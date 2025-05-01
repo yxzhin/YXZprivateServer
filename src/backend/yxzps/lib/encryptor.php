@@ -8,6 +8,17 @@ class Encryptor{
 
     }
 
+    public static function checkGJP2(int $accountID, string $gjp2): bool {
+
+        $target_gjp2 = DBManager::baseSelect(["gjp2"], "accounts", "accountID", $accountID);
+
+        if(!password_verify($gjp2, $target_gjp2))
+        return 0;
+
+        return 1;
+
+    }
+
 }
 
 ?>

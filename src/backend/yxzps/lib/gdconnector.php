@@ -59,7 +59,7 @@ class GDConnector{
             "0", //27
             $account->icons["accGlow"],
             "1", //29
-            $account->getRank(), // @TODO: ranking
+            $account->getRank(),
             "0", //31
             "0", //32
             "0", //33
@@ -67,9 +67,9 @@ class GDConnector{
             "0", //35
             "0", //36
             "0", //37
-            "0", //38
-            "0", //39
-            "0", //40
+            "0", //38 (37 in the code, new messages count)
+            "0", //39 (38 in the code, new friend requests count)
+            "0", //40 (39 in the code, new friends count)
             "0", //41
             "0", //42
             $account->icons["accSpider"],
@@ -89,13 +89,12 @@ class GDConnector{
             "7,3,7,3,7,3", // @TODO: platformerLevels
         ];
 
-        if($me){
-
-            $data[37] = 2147483647; // @TODO: messages
-            $data[38] = 2147483647; // @TODO: friendRequests
-            $data[39] = 2147483647; // @TODO: newFriends
-            
-        }
+        $counts = $account->getNewNotificationsCounts();
+        // apologize me for this, it's all because of
+        // huinya that robtop did with account string structure :sob:
+        if($me)
+        foreach($counts as $k=>$v)
+        $data[37+array_search($k, array_keys($counts))] = $v;
 
         $account_string = "";
 
@@ -105,6 +104,42 @@ class GDConnector{
         $account_string = substr($account_string, 0, -1);
 
         return $account_string;
+
+    }
+
+    public static function getAccountComments(Account $account, int $page): string {
+
+        if(!isset($account->accountID))
+        return ERROR_NOT_FOUND;
+
+        if($page < 0)
+        return ERROR_GENERIC;
+
+        $account_comments_array = $account->getAccountComments($page);
+
+        $account_comments = $account_comments_array[0];
+        $total_account_comments_count = $account_comments_array[1];
+        $offset = $page*10;
+
+        $account_comments_string = "";
+
+        foreach($account_comments as $account_comment){
+
+            $comment = base64_encode($account_comment->comment);
+            $likes = $account_comment->likes;
+            $insertID = $account_comment->insertID;
+            $time = Utils::getReadableTimeDifferenceFromUnixTimestamp($account_comment->time);
+            $time = str_replace(" ago", "", $time);
+
+            $account_comment_data = "2~{$comment}~4~{$likes}~6~{$insertID}~9~{$time}";
+            $account_comments_string .= $account_comment_data."|";
+
+        }
+
+        $account_comments_string = substr($account_comments_string, 0, -1);
+        $account_comments_string .= "#{$total_account_comments_count}:{$offset}:10";
+
+        return $account_comments_string;
 
     }
 

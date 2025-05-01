@@ -10,7 +10,7 @@ class Clan{
     public ?array $levels;
     public int $time;
 
-    public function load(?int $clanID){
+    public function load(?int $clanID): string {
         
         $data = DBManager::baseSelect(["*"], "clans", "clanID", $clanID);
 

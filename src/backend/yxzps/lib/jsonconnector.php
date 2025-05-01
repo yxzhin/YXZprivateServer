@@ -81,21 +81,63 @@ class JSONConnector{
         if(!isset($account->accountID))
         return self::notFound(["accountID"=>null]);
 
+        $rank = $account->getRank();
+        $userName = $account->getPrefixedUserName();
+        $registration_time = Utils::getReadableTimeDifferenceFromUnixTimestamp($account->time);
+
         $data = [
-            "rank"=>$account->getRank(),
-            "userName"=>$account->getPrefixedUserName(),
-            "registration_time"=>Utils::getReadableTimeDifferenceFromUnixTimestamp($account->time),
+            "rank"=>$rank,
+            "userName"=>$userName,
+            "registration_time"=>$registration_time,
             "stats"=>$account->stats,
             "icons"=>$account->icons,
             "settings"=>$account->settings,
             "roles"=>$account->roles,
         ];
 
-        if($me){
+        $counts = $account->getNewNotificationsCounts();
+        // okay this doesn't look that bad in comparison to the gdconnector one :sob:
+        if($me)
+        foreach($counts as $k=>$v)
+        $data[$k] = $v;
 
-            $data["new_messages_count"] = 2147483647; // @TODO: messages
-            $data["new_friend_requests_count"] = 2147483647; // @TODO: friendRequests
-            $data["new_friends_count"] = 2147483647; // @TODO: newFriends
+        return self::success($data);
+
+    }
+
+    public static function getAccountComments(Account $account, int $page): string {
+
+        if(!isset($account->accountID))
+        return self::notFound(["accountID"=>null]);
+        
+        if($page < 0)
+        return self::errorGeneric();
+
+        $account_comments_array = $account->getAccountComments($page);
+
+        $account_comments = $account_comments_array[0];
+        $total_account_comments_count = $account_comments_array[1];
+
+        $data = [
+            "total_account_comments_count"=>$total_account_comments_count,
+            "page"=>$page,
+            "account_comments"=>array(),
+        ];
+
+        foreach($account_comments as $account_comment){
+
+            $comment = $account_comment->comment;
+            $likes = $account_comment->likes;
+            $upload_time = Utils::getReadableTimeDifferenceFromUnixTimestamp($account_comment->time);
+            $insertID = $account_comment->insertID;
+
+            $account_comment_data = [
+                "comment"=>$comment,
+                "likes"=>$likes,
+                "upload_time"=>$upload_time,
+            ];
+
+            $data["account_comments"][$insertID] = $account_comment_data;
 
         }
 

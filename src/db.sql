@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Хост: localhost
--- Время создания: Апр 29 2025 г., 22:25
+-- Время создания: Май 01 2025 г., 14:27
 -- Версия сервера: 8.0.26-17
 -- Версия PHP: 7.3.33
 
@@ -103,16 +103,17 @@ CREATE TABLE `clans` (
 -- --------------------------------------------------------
 
 --
--- Структура таблицы `friendRequests`
+-- Структура таблицы `comments`
 --
 
-CREATE TABLE `friendRequests` (
+CREATE TABLE `comments` (
   `insertID` int NOT NULL,
   `accountID` int NOT NULL,
-  `target_accountID` int NOT NULL,
-  `message` varchar(255) NOT NULL,
+  `level_or_listID` int DEFAULT NULL,
+  `comment` varchar(255) NOT NULL,
+  `likes` int NOT NULL,
   `time` int NOT NULL,
-  `is_new` tinyint(1) NOT NULL DEFAULT '1'
+  `percent` int DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=cp1251;
 
 -- --------------------------------------------------------
@@ -123,9 +124,25 @@ CREATE TABLE `friendRequests` (
 
 CREATE TABLE `friends` (
   `insertID` int NOT NULL,
-  `accountID1` int NOT NULL,
-  `accountID2` int NOT NULL,
-  `time` int NOT NULL
+  `accountID` int NOT NULL,
+  `target_accountID` int NOT NULL,
+  `time` int NOT NULL,
+  `is_new` tinyint(1) NOT NULL DEFAULT '1'
+) ENGINE=InnoDB DEFAULT CHARSET=cp1251;
+
+-- --------------------------------------------------------
+
+--
+-- Структура таблицы `friend_requests`
+--
+
+CREATE TABLE `friend_requests` (
+  `insertID` int NOT NULL,
+  `accountID` int NOT NULL,
+  `target_accountID` int NOT NULL,
+  `message` varchar(255) NOT NULL,
+  `time` int NOT NULL,
+  `is_new` tinyint(1) NOT NULL DEFAULT '1'
 ) ENGINE=InnoDB DEFAULT CHARSET=cp1251;
 
 -- --------------------------------------------------------
@@ -140,6 +157,22 @@ CREATE TABLE `logs` (
   `type` int NOT NULL,
   `attrs` text CHARACTER SET cp1251 COLLATE cp1251_general_ci,
   `time` int NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=cp1251;
+
+-- --------------------------------------------------------
+
+--
+-- Структура таблицы `messages`
+--
+
+CREATE TABLE `messages` (
+  `insertID` int NOT NULL,
+  `accountID` int NOT NULL,
+  `target_accountID` int NOT NULL,
+  `title` varchar(255) NOT NULL,
+  `content` varchar(255) NOT NULL,
+  `time` int NOT NULL,
+  `is_new` tinyint(1) NOT NULL DEFAULT '1'
 ) ENGINE=InnoDB DEFAULT CHARSET=cp1251;
 
 -- --------------------------------------------------------
@@ -201,9 +234,9 @@ ALTER TABLE `clans`
   ADD UNIQUE KEY `ownerID` (`ownerID`);
 
 --
--- Индексы таблицы `friendRequests`
+-- Индексы таблицы `comments`
 --
-ALTER TABLE `friendRequests`
+ALTER TABLE `comments`
   ADD PRIMARY KEY (`insertID`);
 
 --
@@ -213,9 +246,21 @@ ALTER TABLE `friends`
   ADD PRIMARY KEY (`insertID`);
 
 --
+-- Индексы таблицы `friend_requests`
+--
+ALTER TABLE `friend_requests`
+  ADD PRIMARY KEY (`insertID`);
+
+--
 -- Индексы таблицы `logs`
 --
 ALTER TABLE `logs`
+  ADD PRIMARY KEY (`insertID`);
+
+--
+-- Индексы таблицы `messages`
+--
+ALTER TABLE `messages`
   ADD PRIMARY KEY (`insertID`);
 
 --
@@ -260,9 +305,9 @@ ALTER TABLE `clans`
   MODIFY `insertID` int NOT NULL AUTO_INCREMENT;
 
 --
--- AUTO_INCREMENT для таблицы `friendRequests`
+-- AUTO_INCREMENT для таблицы `comments`
 --
-ALTER TABLE `friendRequests`
+ALTER TABLE `comments`
   MODIFY `insertID` int NOT NULL AUTO_INCREMENT;
 
 --
@@ -272,9 +317,21 @@ ALTER TABLE `friends`
   MODIFY `insertID` int NOT NULL AUTO_INCREMENT;
 
 --
+-- AUTO_INCREMENT для таблицы `friend_requests`
+--
+ALTER TABLE `friend_requests`
+  MODIFY `insertID` int NOT NULL AUTO_INCREMENT;
+
+--
 -- AUTO_INCREMENT для таблицы `logs`
 --
 ALTER TABLE `logs`
+  MODIFY `insertID` int NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT для таблицы `messages`
+--
+ALTER TABLE `messages`
   MODIFY `insertID` int NOT NULL AUTO_INCREMENT;
 COMMIT;
 

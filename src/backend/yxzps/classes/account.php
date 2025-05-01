@@ -16,7 +16,7 @@ class Account{
     public array $settings;
     public array $roles;
 
-    public function load(int $accountID): string|bool {
+    public function load(int $accountID): string {
 
         $data = DBManager::baseSelect(["*"], "accounts", "accountID", $accountID);
 
@@ -43,6 +43,9 @@ class Account{
 
     public static function register(string $userName, string $password, string $email): string|int {
 
+        if(DBManager::baseSelect(["count(*)"], "accounts", "ip", IP))
+        return ERROR_ACCOUNT_LIMIT_PER_IP_REACHED;
+
         if(!FILTER::filterUserName($userName)
         || !FILTER::filterPassword($password)
         || !FILTER::filterEmail($email))
@@ -55,7 +58,7 @@ class Account{
         return ERROR_EMAIL_ALREADY_TAKEN;
 
         $accountID = random_int(100000000, 999999999);
-        $gjp2 = password_hash(ENCRYPTOR::generateGJP2($password), PASSWORD_BCRYPT);
+        $gjp2 = password_hash(Encryptor::generateGJP2($password), PASSWORD_BCRYPT);
         $time = time();
         $stats = json_encode(DEFAULT_STATS);
         $icons = json_encode(DEFAULT_ICONS);
@@ -84,7 +87,7 @@ class Account{
             "userName"=>$userName,
         ]);
 
-        PROTECTOR::log_(LOG_ACCOUNT_REGISTERED, $attrs);
+        Protector::log_(LOG_ACCOUNT_REGISTERED, $attrs);
 
         return $accountID;
 
@@ -108,17 +111,17 @@ class Account{
         if(empty($accountID))
         $accountID = DBManager::baseSelect(["accountID"], "accounts", "userName", $userName);
 
-        if(!PROTECTOR::checkGJP2($accountID, $gjp2)){
+        if(!Encryptor::checkGJP2($accountID, $gjp2)){
 
-            PROTECTOR::log_(LOG_FAILED_LOGIN_ATTEMPT_FROM_IP);
+            Protector::log_(LOG_FAILED_LOGIN_ATTEMPT_FROM_IP);
             
-            $login_attempts = PROTECTOR::getFailedLoginAttempts();
+            $login_attempts = Protector::getFailedLoginAttempts();
 
             return array(ERROR_INVALID_CREDENTIALS, $login_attempts);
 
         }
 
-        $ban = PROTECTOR::checkIfBanned(accountID:$accountID);
+        $ban = Protector::checkIfBanned(accountID:$accountID);
 
         if($ban)
         return array(ERROR_ACCOUNT_BANNED, $ban[0], $ban[1]);
@@ -137,7 +140,7 @@ class Account{
         ]);
 
         if(DEBUG_MODE)
-        PROTECTOR::log_(LOG_ACCOUNT_LOGIN, $attrs);
+        Protector::log_(LOG_ACCOUNT_LOGIN, $attrs);
 
         if($return_success)
         return SUCCESS;
@@ -146,13 +149,13 @@ class Account{
 
     }
 
-    public static function activate(string $userName, string $password, int $verification_code): string|bool {
+    public static function activate(string $userName, string $password, int $verification_code): string {
 
         // @TODO
 
 
 
-        return 1;
+        return SUCCESS;
 
     }
 
@@ -201,9 +204,7 @@ class Account{
             continue;
 
             $role = new Role();
-            $role->load($roleID);
-
-            if(!isset($role->roleID))
+            if($role->load($roleID) < 0)
             continue;
 
             if($role->priority > $highest_role->priority)
@@ -224,7 +225,78 @@ class Account{
         $clan->load($this->clanID);
         $clan_prefix = isset($clan->clan_tag) ? "[".$clan->clan_tag."] " : "";
 
-        return $clan_prefix.$this->userName.$role_prefix;
+        $userName = $this->userName;
+        $prefixedUserName = $clan_prefix.$userName.$role_prefix;
+
+        return $prefixedUserName;
+
+    }
+
+    public function getNewNotificationsCounts(): array {
+
+        $query = CONN->prepare("SELECT
+        IFNULL((SELECT count(*) FROM messages
+        WHERE is_new = 1
+        AND target_accountID = :target_accountID), 0)
+        AS new_messages_count,
+        IFNULL((SELECT count(*) FROM friend_requests
+        WHERE is_new = 1
+        AND target_accountID = :target_accountID), 0)
+        AS new_friend_requests_count,
+        IFNULL((SELECT count(*) FROM friends
+        WHERE is_new = 1
+        AND target_accountID = :target_accountID
+        OR accountID = :target_accountID), 0)
+        AS new_friends_count");
+
+        $query->execute(["target_accountID"=>$this->accountID]);
+        $counts = $query->fetch(PDO::FETCH_ASSOC);
+
+        return $counts;
+
+    }
+
+    public function getAccountComments(int $page): array {
+
+        $empty = array(array(), 0);
+
+        if($page < 0)
+        return $empty;
+
+        $account_comments = array();
+        $accountID = $this->accountID;
+        $offset = $page*10;
+
+        $query = CONN->prepare("SELECT count(*) FROM comments
+        WHERE accountID = :accountID
+        AND level_or_listID IS NULL");
+
+        $query->execute([":accountID"=>$accountID]);
+        $total_account_comments_count = $query->fetchColumn();
+
+        if($total_account_comments_count == 0)
+        return $empty;
+
+        $query = CONN->prepare("SELECT insertID FROM comments
+        WHERE accountID = :accountID
+        AND level_or_listID IS NULL
+        ORDER BY time DESC
+        LIMIT {$offset}, 10");
+
+        $query->execute([":accountID"=>$accountID]);
+        $raw_account_comments_ids = $query->fetchAll();
+
+        foreach($raw_account_comments_ids as $raw_account_comment_id){
+
+            $account_comment_id = $raw_account_comment_id["insertID"]; 
+            $account_comment = new Comment();
+            $account_comment->load($account_comment_id);
+
+            array_push($account_comments, $account_comment);
+
+        }
+
+        return array($account_comments, $total_account_comments_count);
 
     }
 
