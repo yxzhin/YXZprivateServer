@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Хост: localhost
--- Время создания: Май 01 2025 г., 14:27
+-- Время создания: Май 02 2025 г., 19:32
 -- Версия сервера: 8.0.26-17
 -- Версия PHP: 7.3.33
 
@@ -192,6 +192,19 @@ CREATE TABLE `roles` (
   `perms_dashboard` text CHARACTER SET cp1251 COLLATE cp1251_general_ci NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=cp1251;
 
+-- --------------------------------------------------------
+
+--
+-- Структура таблицы `save_data`
+--
+
+CREATE TABLE `save_data` (
+  `insertID` int NOT NULL,
+  `account_or_levelID` int NOT NULL,
+  `save_data` mediumtext NOT NULL,
+  `time` int NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=cp1251;
+
 --
 -- Индексы сохранённых таблиц
 --
@@ -271,6 +284,12 @@ ALTER TABLE `roles`
   ADD UNIQUE KEY `priority` (`priority`);
 
 --
+-- Индексы таблицы `save_data`
+--
+ALTER TABLE `save_data`
+  ADD PRIMARY KEY (`insertID`);
+
+--
 -- AUTO_INCREMENT для сохранённых таблиц
 --
 
@@ -332,6 +351,12 @@ ALTER TABLE `logs`
 -- AUTO_INCREMENT для таблицы `messages`
 --
 ALTER TABLE `messages`
+  MODIFY `insertID` int NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT для таблицы `save_data`
+--
+ALTER TABLE `save_data`
   MODIFY `insertID` int NOT NULL AUTO_INCREMENT;
 COMMIT;
 
