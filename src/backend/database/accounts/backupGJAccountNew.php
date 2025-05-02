@@ -11,7 +11,7 @@ ERROR_GENERIC);
 
 $accountID = $_POST["accountID"] ?? null;
 $gjp2 = $_POST["gjp2"] ?? "";
-$save_data = $_POST["save_data"] ?? "";
+$save_data = $_POST["saveData"] ?? "";
 
 $account = new Account();
 
