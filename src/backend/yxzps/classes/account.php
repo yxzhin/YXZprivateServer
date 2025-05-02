@@ -358,16 +358,28 @@ class Account{
                 file_put_contents($path, $save_data);
                 break;
 
-            case 2: 
+            case 2:
 
-                $time = time();
-                $data=[
-                    "account_or_levelID"=>$accountID,
-                    "save_data"=>$save_data,
-                    "time"=>$time,
-                ];
+                if(DBManager::baseSelect(["count(*)"], "save_data", "account_or_levelID", $accountID)){
 
-                DBManager::baseInsert($data, "save_data");
+                    $query = CONN->prepare("UPDATE save_data SET save_data = :save_data
+                    WHERE account_or_levelID = :account_or_levelID");
+                    $query->execute([":save_data"=>$save_data, ":account_or_levelID"=>$accountID]);
+                
+                } else {
+
+                    $time = time();
+
+                    $data=[
+                        "account_or_levelID"=>$accountID,
+                        "save_data"=>$save_data,
+                        "time"=>$time,
+                    ];
+
+                    DBManager::baseInsert($data, "save_data");
+
+                }
+
                 break;
 
             default: $result = ERROR_GENERIC; break;

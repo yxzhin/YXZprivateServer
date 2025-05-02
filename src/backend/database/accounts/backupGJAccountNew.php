@@ -2,6 +2,9 @@
 
 require_once __DIR__."/../../yxzps/yxzps.php";
 
+if(function_exists("set_time_limit"))
+set_time_limit(0);
+
 if(!isset($_POST["secret"])
 || $_POST["secret"] !== "Wmfv3899gc9"
 || !Protector::checkGameAndBinaryVersion())
