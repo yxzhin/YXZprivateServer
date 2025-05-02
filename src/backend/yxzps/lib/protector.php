@@ -32,10 +32,11 @@ class Protector{
 
     }
 
-    public static function log_(int $type, ?string $attrs=null, ?int $time=null, ?string $ip=null){
+    public static function log_(int $type, ?array $attrs=null, ?int $time=null, ?string $ip=null){
 
         if(!$time) $time = time();
         if(!$ip) $ip = IP;
+        $attrs = json_encode($attrs);
 
         DBManager::baseInsert([
             "ip"=>$ip,

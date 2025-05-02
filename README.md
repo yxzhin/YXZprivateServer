@@ -20,3 +20,4 @@ yet another implementation of private geometry dash server emulator
 - @svlemogames for some cool stuff and a server where i can test my projects on lol
 - @m41denx and FruitSpace for inspiration (spizdil nemnogo idey iz ghostcore lol)
 - @Partur-dev also for some help
+- @MegaSa1nt for getAccountURL.php code (adapted from his fork of GMDprivateServer by Cvolton)

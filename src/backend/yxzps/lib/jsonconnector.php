@@ -149,6 +149,22 @@ class JSONConnector{
 
     }
 
+    public static function backupAccount(int|string $result): string {
+
+        if($result < 0)
+        return self::errorGeneric();
+
+        $time = time();
+
+        $data = [
+            "save_data_size"=>$result,
+            "time"=>$time,
+        ];
+
+        return self::success($data);
+
+    }
+
 }
 
 ?>

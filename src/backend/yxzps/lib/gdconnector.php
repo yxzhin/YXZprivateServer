@@ -152,6 +152,15 @@ class GDConnector{
 
     }
 
+    public static function backupAccount(int|string $result): string {
+
+        if($result < 0)
+        return ERROR_GENERIC;
+
+        return "1";
+
+    }
+
 }
 
 ?>

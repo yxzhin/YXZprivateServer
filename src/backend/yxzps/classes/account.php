@@ -82,11 +82,11 @@ class Account{
 
         $insertID = CONN->lastInsertId();
 
-        $attrs = json_encode([
+        $attrs = [
             "insertID"=>$insertID,
             "accountID"=>$accountID,
             "userName"=>$userName,
-        ]);
+        ];
 
         Protector::log_(LOG_ACCOUNT_REGISTERED, $attrs);
 
@@ -140,10 +140,10 @@ class Account{
 
         if(DEBUG_MODE){
 
-            $attrs = json_encode([
+            $attrs = [
                 "accountID"=>$accountID,
                 "userName"=>$userName,
-            ]);
+            ];
 
             Protector::log_(LOG_ACCOUNT_LOGIN, $attrs);
 
@@ -194,8 +194,7 @@ class Account{
 
         if($type == 1){
 
-            $stars = $this->stats["stars"];
-            $moons = $this->stats["moons"];
+            [$stars, $moons] = [$this->stats["stars"], $this->stats["moons"]];
 
             $ranking_type_stars = "JSON_EXTRACT(stats, \"$.stars\")";
             $ranking_type_moons = "JSON_EXTRACT(stats, \"$.moons\")";
@@ -339,6 +338,58 @@ class Account{
         }
 
         return array($account_comments, $total_account_comments_count);
+
+    }
+
+    public function backupAccount(string $save_data): string|bool {
+
+        if(empty($save_data))
+        return ERROR_GENERIC;
+
+        $accountID = $this->accountID;
+        $result = SUCCESS;
+        $path = null;
+
+        switch(ACCOUNTS_SAVE_TYPE){
+
+            case 1:
+                
+                $path = __DIR__."/../data/accounts/{$accountID}";
+                file_put_contents($path, $save_data);
+                break;
+
+            case 2: 
+
+                $time = time();
+                $data=[
+                    "account_or_levelID"=>$accountID,
+                    "save_data"=>$save_data,
+                    "time"=>$time,
+                ];
+
+                DBManager::baseInsert($data, "save_data");
+                break;
+
+            default: $result = ERROR_GENERIC; break;
+
+        }
+
+        if($result == SUCCESS){
+
+            $save_data_size = $path ? filesize($path) : mb_strlen($save_data, "UTF-8");;
+
+            $attrs = [
+                "accountID"=>$accountID,
+                "save_data_size"=>$save_data_size,
+            ];
+
+            Protector::log_(LOG_ACCOUNT_BACKUP, $attrs);
+
+            return $save_data_size;
+
+        }
+
+        return $result;
 
     }
 

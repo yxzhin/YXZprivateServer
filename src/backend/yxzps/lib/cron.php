@@ -35,10 +35,10 @@ class Cron{
         $last_run_time = time();
         file_put_contents($path, $last_run_time);
 
-        $attrs = json_encode([
+        $attrs = [
             "createDefaultRoleIfNotExists"=>$createDefaultRoleIfNotExists,
             "createReuploadAccountIfNotExists"=>$createReuploadAccountIfNotExists,
-        ]);
+        ];
 
         PROTECTOR::log_(LOG_CRON_DONE, $attrs, $last_run_time);
 

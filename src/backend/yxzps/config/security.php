@@ -13,8 +13,8 @@ define("GMD_BINARY_VERSIONS", [45, 44, 43, 42, 41, 40, 39, 38, 37, 36]);
 // will run cron once in given time in seconds (3600=one hour)
 define("CRON_COOLDOWN", 3600);
 
-//0=infinite
-define("MAX_ACCOUNTS_PER_IP", 0);
+// 0=infinite
+define("MAX_ACCOUNTS_PER_IP", 2);
 
 define("MAX_LOGIN_ATTEMPTS_FROM_IP", 5);
 
