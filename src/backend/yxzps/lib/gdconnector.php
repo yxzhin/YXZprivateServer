@@ -29,13 +29,18 @@ class GDConnector{
 
     public static function getAccountInfo(Account $account, bool $me): string {
 
+        $userName = $account->getPrefixedUserName();
+        $rank = $account->getRank();
+        $highest_role = $account->getHighestRole();
+        $mod_badge_level = $highest_role->mod_badge_level;
+
         $data = [
-            $account->getPrefixedUserName(),
+            $userName,
             $account->accountID,
             $account->stats["stars"],
             $account->stats["demons"],
             "0", //5
-            $account->getRank(),
+            $rank,
             $account->accountID,
             $account->stats["creatorpoints"],
             $account->icons["icon"],
@@ -59,7 +64,7 @@ class GDConnector{
             "0", //27
             $account->icons["accGlow"],
             "1", //29
-            $account->getRank(),
+            $rank,
             "0", //31
             "0", //32
             "0", //33
@@ -78,7 +83,7 @@ class GDConnector{
             $account->stats["diamonds"],
             "0", //47
             $account->icons["accExplosion"],
-            "2", // @TODO: modLevel
+            $mod_badge_level,
             $account->settings["cS"],
             $account->icons["color3"],
             $account->stats["moons"],
@@ -89,12 +94,16 @@ class GDConnector{
             "7,3,7,3,7,3", // @TODO: platformerLevels
         ];
 
-        $counts = $account->getNewNotificationsCounts();
         // apologize me for this, it's all because of
         // huinya that robtop did with account string structure :sob:
-        if($me)
-        foreach($counts as $k=>$v)
-        $data[37+array_search($k, array_keys($counts))] = $v;
+        if($me){
+
+            $counts = $account->getNewNotificationsCounts();
+
+            foreach($counts as $k=>$v)
+            $data[37+array_search($k, array_keys($counts))] = $v;
+
+        }
 
         $account_string = "";
 

@@ -95,11 +95,15 @@ class JSONConnector{
             "roles"=>$account->roles,
         ];
 
-        $counts = $account->getNewNotificationsCounts();
         // okay this doesn't look that bad in comparison to the gdconnector one :sob:
-        if($me)
-        foreach($counts as $k=>$v)
-        $data[$k] = $v;
+        if($me){
+
+            $counts = $account->getNewNotificationsCounts();
+
+            foreach($counts as $k=>$v)
+            $data[$k] = $v;
+
+        }
 
         return self::success($data);
 

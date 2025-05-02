@@ -1,5 +1,7 @@
 <?php
 
+define("TEMP_DIR", __DIR__."/../temp");
+
 class Utils{
 
     public static function arrayGet(array $array, $key){
@@ -47,8 +49,8 @@ class Utils{
     public static function debugPrintPost(bool $write_to_temp=false){
 
         $post = array();
-        $path = __DIR__."/../temp";
-        if(!file_exists($path)) mkdir($path);
+        
+        if(!file_exists(TEMP_DIR)) mkdir(TEMP_DIR);
 
         foreach($_POST as $k=>$v){
 
@@ -58,7 +60,13 @@ class Utils{
 
         }
 
-        if($write_to_temp) file_put_contents($path."/debug_print_post.txt", join("", $post));
+        if($write_to_temp) file_put_contents(TEMP_DIR."/debug_print_post.txt", join("", $post));
+
+    }
+
+    public static function writeToTemp(string $content){
+
+        file_put_contents(TEMP_DIR."/debug.txt", $content);
 
     }
 

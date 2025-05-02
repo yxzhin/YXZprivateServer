@@ -2,32 +2,58 @@
 
 class Filter{
 
-    public static function filterUserName(string $userName): bool {
+    public static function baseFilterString(?string $var, ?array $exceptions=null): bool {
 
-        $userName = strip_tags(trim($userName));
+        $var = strip_tags(trim($var), $exceptions);
 
-        return !empty($userName)
-        && strlen($userName) >= 3
+        return !empty($var);
+     
+    }
+
+    public static function baseFilterInt(?int $var, int $min_range=0, int $max_range=2147483647): bool {
+
+        $options = [ 
+            "options"=>[
+                "min_range"=>$min_range,
+                "max_range"=>$max_range,
+            ],
+        ];
+
+        return filter_var($var, FILTER_VALIDATE_INT, $options) !== false;
+
+    }
+
+    public static function filterAccountID(?int $accountID): bool {
+
+        return self::baseFilterInt($accountID, 100000000, 999999999);
+
+    }
+
+    public static function filterUserName(?string $userName): bool {
+
+        if(!self::baseFilterString($userName))
+        return 0;
+
+        return strlen($userName) >= 3
         && strlen($userName) <= 15;
 
     }
 
-    public static function filterPassword(string $password): bool {
+    public static function filterPassword(?string $password): bool {
 
-        $password = strip_tags(trim($password), ["_", "-"]);
+        $password = strip_tags(trim($password), );
 
-        return !empty($password)
-        && strlen($password) >= 6
+        return strlen($password) >= 6
         && strlen($password) <= 20;
 
     }
 
-    public static function filterEmail(string $email): bool {
+    public static function filterEmail(?string $email): bool {
 
-        $email = strip_tags(trim($email), ["@", ".", "_", "-"]);
+        if(!self::baseFilterString($email, ["@", ".", "_", "-"]))
+        return 0;
 
-        return !empty($email)
-        && strlen($email) >= 5
+        return strlen($email) >= 5
         && strlen($email) <= 50
         && filter_var($email, FILTER_VALIDATE_EMAIL);
 

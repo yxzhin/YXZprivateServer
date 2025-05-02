@@ -41,14 +41,15 @@ class Account{
 
     }
 
-    public static function register(string $userName, string $password, string $email): string|int {
+    public static function register(?string $userName, ?string $password, ?string $email): string|int {
 
-        if(DBManager::baseSelect(["count(*)"], "accounts", "ip", IP))
+        if(MAX_ACCOUNTS_PER_IP > 0
+        && DBManager::baseSelect(["count(*)"], "accounts", "ip", IP) > MAX_ACCOUNTS_PER_IP)
         return ERROR_ACCOUNT_LIMIT_PER_IP_REACHED;
 
-        if(!FILTER::filterUserName($userName)
-        || !FILTER::filterPassword($password)
-        || !FILTER::filterEmail($email))
+        if(!Filter::FilterUserName($userName)
+        || !Filter::FilterPassword($password)
+        || !Filter::FilterEmail($email))
         return ERROR_GENERIC;
 
         if(DBManager::baseSelect(["count(*)"], "accounts", "userName", $userName) > 0)
@@ -93,25 +94,31 @@ class Account{
 
     }
 
-    public static function login(string $gjp2, ?string $userName=null,
+    public static function login(?string $gjp2, ?string $userName=null,
         ?int $accountID=null, bool $return_success=false): string|array {
 
-        if(empty($userName)
-        && empty($accountID))
+        [$userName_passed, $accountID_passed] = [!empty($userName), !empty($accountID)];
+
+        if(!$userName_passed
+        && !$accountID_passed)
         return ERROR_GENERIC;
 
-        if(!empty($userName)
-        && !FILTER::filterUserName($userName))
+        if($userName_passed
+        && !Filter::FilterUserName($userName))
         return ERROR_GENERIC;
 
-        if(!empty($accountID)
-        && !filter_var($accountID, FILTER_VALIDATE_INT))
+        if($accountID_passed
+        && !Filter::filterAccountID($accountID))
         return ERROR_GENERIC;
 
-        if(empty($accountID))
+        if(!$accountID_passed)
         $accountID = DBManager::baseSelect(["accountID"], "accounts", "userName", $userName);
 
-        if(!Encryptor::checkGJP2($accountID, $gjp2)){
+        $target_userName = DBManager::baseSelect(["userName"], "accounts", "accountID", $accountID);
+
+        if(!Encryptor::checkGJP2($accountID, $gjp2)
+        || $userName_passed
+        && $target_userName != $userName){
 
             Protector::log_(LOG_FAILED_LOGIN_ATTEMPT_FROM_IP);
             
@@ -131,21 +138,21 @@ class Account{
         if(!$is_active)
         return ERROR_ACCOUNT_NOT_ACTIVE;
 
-        $userNamePassed = !empty($userName);
-        $userName = DBManager::baseSelect(["userName"], "accounts", "accountID", $accountID);
+        if(DEBUG_MODE){
 
-        $attrs = json_encode([
-            "accountID"=>$accountID,
-            "userName"=>$userName,
-        ]);
+            $attrs = json_encode([
+                "accountID"=>$accountID,
+                "userName"=>$userName,
+            ]);
 
-        if(DEBUG_MODE)
-        Protector::log_(LOG_ACCOUNT_LOGIN, $attrs);
+            Protector::log_(LOG_ACCOUNT_LOGIN, $attrs);
+
+        }
 
         if($return_success)
         return SUCCESS;
 
-        return $userNamePassed ? $accountID : $userName;
+        return $userName_passed ? $accountID : $userName;
 
     }
 
@@ -156,6 +163,29 @@ class Account{
 
 
         return SUCCESS;
+
+    }
+
+    public function updateAccountInfo(array $new_stats, array $new_icons): int {
+
+        $accountID = $this->accountID;
+        [$stats, $icons] = [$this->stats, $this->icons];
+
+        foreach($new_stats as $k=>$v)
+        $stats[$k] = $v;
+
+        foreach($new_icons as $k=>$v)
+        $icons[$k] = $v;
+
+        [$stats, $icons] = [json_encode($stats), json_encode($icons)];
+
+        $query = CONN->prepare("UPDATE accounts
+        SET stats = :stats, icons = :icons
+        WHERE accountID = :accountID");
+        
+        $query->execute([":stats"=>$stats, ":icons"=>$icons, ":accountID"=>$accountID]);
+
+        return $accountID;
 
     }
 
@@ -197,6 +227,18 @@ class Account{
         
         $highest_role = new Role();
         $highest_role->load(DEFAULT_ROLE_ID);
+
+        if(!in_array(DEFAULT_ROLE_ID, $this->roles)){
+
+            $roles = json_encode($this->roles);
+            $accountID = $this->accountID;
+
+            array_unshift($this->roles, DEFAULT_ROLE_ID);
+
+            $query = CONN->prepare("UPDATE accounts SET roles = :roles WHERE accountID = :accountID");
+            $query->execute([":roles"=>$roles, ":accountID"=>$accountID]);
+
+        };
 
         foreach($this->roles as $roleID){
 
