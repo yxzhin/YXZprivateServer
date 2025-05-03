@@ -6,7 +6,7 @@
 
 class GDConnector{
 
-    public static function accountRegister(int|string $result): int|string {
+    public static function accountRegister(string|int $result): int|string {
 
         if($result < 0)
         return $result;
@@ -15,7 +15,7 @@ class GDConnector{
 
     }
 
-    public static function accountLogin(int|string|array $result): int|string {
+    public static function accountLogin(string|array|bool $result): int|string {
 
         if(is_array($result))
         return $result[0];
@@ -152,7 +152,7 @@ class GDConnector{
 
     }
 
-    public static function backupAccount(int|string $result): string {
+    public static function backupAccount(string|bool $result): string {
 
         if($result < 0)
         return ERROR_GENERIC;

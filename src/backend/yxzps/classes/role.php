@@ -49,10 +49,10 @@ class Role{
         if(DBManager::baseSelect(["count(*)"], "roles", "roleID", $roleID))
         return ERROR_ALREADY_TAKEN;
 
-        $attrs = json_encode([
+        $attrs = [
             "roleID"=>$roleID,
             "display_name"=>$display_name,
-        ]);
+        ];
 
         DBManager::baseInsert([
             "roleID"=>$roleID,

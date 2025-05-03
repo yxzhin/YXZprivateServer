@@ -95,7 +95,7 @@ class Account{
     }
 
     public static function login(?string $gjp2, ?string $userName=null,
-        ?int $accountID=null, bool $return_success=false): string|array {
+        ?int $accountID=null, bool $return_success=false): string|array|bool {
 
         [$userName_passed, $accountID_passed] = [!empty($userName), !empty($accountID)];
 
@@ -186,6 +186,112 @@ class Account{
         $query->execute([":stats"=>$stats, ":icons"=>$icons, ":accountID"=>$accountID]);
 
         return $accountID;
+
+    }
+
+    public function backupAccount(string $save_data): string|bool {
+
+        if(empty($save_data))
+        return ERROR_GENERIC;
+
+        $accountID = $this->accountID;
+
+        switch(ACCOUNTS_SAVE_TYPE){
+
+            case 1:
+                
+                $path = __DIR__."/../data/accounts/{$accountID}";
+                file_put_contents($path, $save_data);
+                break;
+
+            case 2:
+
+                $time = time();
+
+                if(DBManager::baseSelect(["count(*)"], "save_data", "account_or_levelID", $accountID)){
+
+                    $query = CONN->prepare("UPDATE save_data SET
+                    save_data = :save_data,
+                    time = :time
+                    WHERE account_or_levelID = :account_or_levelID");
+                    $query->execute([":save_data"=>$save_data, ":time"=>$time, ":account_or_levelID"=>$accountID]);
+                
+                } else {
+
+                    $data=[
+                        "account_or_levelID"=>$accountID,
+                        "save_data"=>$save_data,
+                        "time"=>$time,
+                    ];
+
+                    DBManager::baseInsert($data, "save_data");
+
+                }
+
+                break;
+
+            default: return ERROR_GENERIC;
+
+        }
+
+        $save_data_size = $path ? filesize($path) : mb_strlen($save_data, "UTF-8");;
+
+        $attrs = [
+            "accountID"=>$accountID,
+            "save_data_size"=>$save_data_size,
+        ];
+
+        Protector::log_(LOG_ACCOUNT_BACKUP, $attrs);
+
+        return $save_data_size;
+
+    }
+
+    public function syncAccount(): string|bool {
+
+        $accountID = $this->accountID;
+
+        switch(ACCOUNTS_SAVE_TYPE){
+
+            case 1:
+                
+                $path = __DIR__."/../data/accounts/{$accountID}";
+
+                if(!file_exists($path))
+                return ERROR_GENERIC;
+
+                $save_data = file_get_contents($path);
+
+                break;
+
+            case 2:
+
+                $save_data = DBManager::baseSelect(["save_data"], "save_data", "account_or_levelID", $accountID);
+
+                if(empty($save_data))
+                return ERROR_GENERIC;
+
+                break;
+
+            default: return ERROR_GENERIC;
+
+        }
+
+        $game_version = $_POST["gameVersion"];
+        $binary_version = $_POST["binaryVersion"];
+
+        $rated_levels = "aa"; //@TODO //gzdeflate(join(",", $rated_levels));
+        $map_packs = "aa"; //@TODO //gzdeflate(join(",", $map_packs));
+
+        $save_data = $save_data.";".$game_version.";".$binary_version.";".$rated_levels.";".$map_packs;
+
+        $attrs = [
+            "accountID"=>$accountID,
+        ];
+
+        Protector::log_(LOG_ACCOUNT_SYNC, $attrs);
+
+        return $save_data;
 
     }
 
@@ -338,70 +444,6 @@ class Account{
         }
 
         return array($account_comments, $total_account_comments_count);
-
-    }
-
-    public function backupAccount(string $save_data): string|bool {
-
-        if(empty($save_data))
-        return ERROR_GENERIC;
-
-        $accountID = $this->accountID;
-        $result = SUCCESS;
-        $path = null;
-
-        switch(ACCOUNTS_SAVE_TYPE){
-
-            case 1:
-                
-                $path = __DIR__."/../data/accounts/{$accountID}";
-                file_put_contents($path, $save_data);
-                break;
-
-            case 2:
-
-                if(DBManager::baseSelect(["count(*)"], "save_data", "account_or_levelID", $accountID)){
-
-                    $query = CONN->prepare("UPDATE save_data SET save_data = :save_data
-                    WHERE account_or_levelID = :account_or_levelID");
-                    $query->execute([":save_data"=>$save_data, ":account_or_levelID"=>$accountID]);
-                
-                } else {
-
-                    $time = time();
-
-                    $data=[
-                        "account_or_levelID"=>$accountID,
-                        "save_data"=>$save_data,
-                        "time"=>$time,
-                    ];
-
-                    DBManager::baseInsert($data, "save_data");
-
-                }
-
-                break;
-
-            default: $result = ERROR_GENERIC; break;
-
-        }
-
-        if($result == SUCCESS){
-
-            $save_data_size = $path ? filesize($path) : mb_strlen($save_data, "UTF-8");;
-
-            $attrs = [
-                "accountID"=>$accountID,
-                "save_data_size"=>$save_data_size,
-            ];
-
-            Protector::log_(LOG_ACCOUNT_BACKUP, $attrs);
-
-            return $save_data_size;
-
-        }
-
-        return $result;
 
     }
 

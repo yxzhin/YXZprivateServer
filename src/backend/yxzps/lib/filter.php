@@ -25,6 +25,9 @@ class Filter{
 
     public static function filterAccountID(?int $accountID): bool {
 
+        if($accountID == 71)
+        return 1; // robtop's ID, you can setup an account with his ID for colored acc comments lol
+
         return self::baseFilterInt($accountID, 100000000, 999999999);
 
     }

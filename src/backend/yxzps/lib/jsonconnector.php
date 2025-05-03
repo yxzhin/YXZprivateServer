@@ -37,7 +37,7 @@ class JSONConnector{
 
     }
 
-    public static function accountRegister(int|string $result): string {
+    public static function accountRegister(string|int $result): string {
 
         $message = Utils::getErrorMessageFromErrorCode($result);
 
@@ -48,7 +48,7 @@ class JSONConnector{
 
     }
 
-    public static function accountLogin(int|string|array $result): string {
+    public static function accountLogin(string|array|bool $result): string {
 
         if(is_array($result)){
 
@@ -149,7 +149,7 @@ class JSONConnector{
 
     }
 
-    public static function backupAccount(int|string $result): string {
+    public static function backupAccount(string|bool $result): string {
 
         if($result < 0)
         return self::errorGeneric();
@@ -158,6 +158,22 @@ class JSONConnector{
 
         $data = [
             "save_data_size"=>$result,
+            "time"=>$time,
+        ];
+
+        return self::success($data);
+
+    }
+
+    public static function syncAccount(string|bool $result): string {
+
+        if($result < 0)
+        return self::errorGeneric();
+
+        $time = time();
+
+        $data = [
+            "save_data"=>$result,
             "time"=>$time,
         ];
 
