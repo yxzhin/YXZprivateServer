@@ -35,21 +35,19 @@ foreach($postfields as $postfield){
     || !$check)
     die($error_generic);
 
-    if(in_array($postfield, $stats_keys)){
+    if(in_array($postfield, $stats_keys))
+    $stats[$postfield] = $_POST[$postfield];
 
-        $stats[$postfield] = $_POST[$postfield];
-        continue;
-
-    }
-
+    elseif(in_array($postfield, $icons_keys))
     $icons[$postfield] = $_POST[$postfield];
 
 }
 
-$account = new Account();
 $gjp2 = $_POST["gjp2"] ?? "";
 $userName = $_POST["userName"] ?? "";
 $accountID = $_POST["accountID"] ?? null;
+
+$account = new Account();
 
 $result = $account->login($gjp2, $userName, $accountID, true);
 
@@ -60,7 +58,7 @@ GDConnector::accountLogin($result));
 
 $account->load($accountID);
 
-$result = $account->updateAccountInfo($stats, $icons);
+$result = $account->updateAccountInfo(new_stats:$stats, new_icons:$icons);
 
 echo JSON ?
 JSONConnector::success() :

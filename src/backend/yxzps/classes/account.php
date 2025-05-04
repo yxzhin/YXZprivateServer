@@ -166,10 +166,11 @@ class Account{
 
     }
 
-    public function updateAccountInfo(array $new_stats, array $new_icons): int {
+    public function updateAccountInfo(array $new_stats=array(), array $new_icons=array(),
+        array $new_settings=array()): int {
 
         $accountID = $this->accountID;
-        [$stats, $icons] = [$this->stats, $this->icons];
+        [$stats, $icons, $settings] = [$this->stats, $this->icons, $this->settings];
 
         foreach($new_stats as $k=>$v)
         $stats[$k] = $v;
@@ -177,13 +178,17 @@ class Account{
         foreach($new_icons as $k=>$v)
         $icons[$k] = $v;
 
-        [$stats, $icons] = [json_encode($stats), json_encode($icons)];
+        foreach($new_settings as $k=>$v)
+        $settings[$k] = $v;
+
+        [$stats, $icons, $settings] = [json_encode($stats), json_encode($icons), json_encode($settings)];
 
         $query = CONN->prepare("UPDATE accounts
-        SET stats = :stats, icons = :icons
+        SET stats = :stats, icons = :icons, settings = :settings
         WHERE accountID = :accountID");
         
-        $query->execute([":stats"=>$stats, ":icons"=>$icons, ":accountID"=>$accountID]);
+        $query->execute([":stats"=>$stats, ":icons"=>$icons, ":settings"=>$settings,
+        ":accountID"=>$accountID]);
 
         return $accountID;
 

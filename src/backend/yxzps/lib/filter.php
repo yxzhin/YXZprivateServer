@@ -4,9 +4,9 @@ class Filter{
 
     public static function baseFilterString(?string $var, ?array $exceptions=null): bool {
 
-        $var = strip_tags(trim($var), $exceptions);
+        $exceptions = $exceptions ? join("", $exceptions) : "";
 
-        return !empty($var);
+        return !preg_match("/[^A-Za-z0-9{$exceptions}]/", $var);
      
     }
 
@@ -53,7 +53,7 @@ class Filter{
 
     public static function filterEmail(?string $email): bool {
 
-        if(!self::baseFilterString($email, ["@", ".", "_", "-"]))
+        if(!self::baseFilterString($email, ["@", ".", "_", "\-"]))
         return 0;
 
         return strlen($email) >= 5
