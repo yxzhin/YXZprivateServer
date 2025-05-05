@@ -138,7 +138,6 @@ class GDConnector{
             $likes = $account_comment->likes;
             $insertID = $account_comment->insertID;
             $time = Utils::getReadableTimeDifferenceFromUnixTimestamp($account_comment->time);
-            $time = str_replace(" ago", "", $time);
 
             $account_comment_data = "2~{$comment}~4~{$likes}~6~{$insertID}~9~{$time}";
             $account_comments_string .= $account_comment_data."|";
@@ -158,6 +157,39 @@ class GDConnector{
         return ERROR_GENERIC;
 
         return "1";
+
+    }
+
+    public static function getChestsRewards(array $values): string {
+
+        $chest1_time_remaining = $values[4];
+        $chest2_time_remaining = $values[7];
+        $reward_type = $values[10];
+
+        if($reward_type == 1
+        && $chest1_time_remaining != 0
+        || $reward_type == 2
+        && $chest2_time_remaining != 0)
+        return ERROR_GENERIC;
+
+        switch($reward_type){
+            case 1: $values[4] = CHEST1_COOLDOWN; break;
+            case 2: $values[7] = CHEST2_COOLDOWN; break;
+        }
+
+        $values[5] = join(",", array_values($values[5]));
+        $values[8] = join(",", array_values($values[8]));
+
+        $random_string = Encryptor::randomString(5);
+        array_unshift($values, $random_string);
+
+        $rewards_string = join(":", $values);
+
+        $rewards_string_encrypted = urlencode(base64_encode(XORCipher::cipher($rewards_string, CHK_KEY_REWARDS)));
+
+        $rewards_hash = Encryptor::generateHash($rewards_string_encrypted, SALT_HASH_REWARDS);
+
+        return $random_string.$rewards_string_encrypted."|".$rewards_hash;
 
     }
 

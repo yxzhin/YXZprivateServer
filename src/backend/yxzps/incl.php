@@ -20,6 +20,7 @@ require_once __DIR__."/lib/gdconnector.php";
 require_once __DIR__."/lib/jsonconnector.php";
 require_once __DIR__."/lib/protector.php";
 require_once __DIR__."/lib/utils.php";
+require_once __DIR__."/lib/XORCipher.php";
 
 require_once __DIR__."/classes/account.php";
 require_once __DIR__."/classes/clan.php";

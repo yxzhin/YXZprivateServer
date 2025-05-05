@@ -10,7 +10,8 @@ class Utils{
 
     }
 
-    public static function getReadableTimeDifferenceFromUnixTimestamp(int $time): string {
+    public static function getReadableTimeDifferenceFromUnixTimestamp(int $time,
+        bool $add_ago=false): string {
         
         $now = new DateTime();
 
@@ -26,7 +27,8 @@ class Utils{
         $minutes = $delta->i > 0 ? $delta->i." minutes, " : "";
         $seconds = $delta->s." seconds ";
 
-        $diff = $years.$months.$days.$hours.$minutes.$seconds."ago";
+        $diff = $years.$months.$days.$hours.$minutes.$seconds;
+        if($add_ago) $diff .= " ago";
 
         return $diff;
 

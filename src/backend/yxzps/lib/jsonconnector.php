@@ -188,6 +188,44 @@ class JSONConnector{
 
     }
 
+    public static function getChestsRewards(array $values): string {
+
+        $reward_type = $values[10];
+
+        switch($reward_type){
+
+            case 1:
+                
+                $values[4] = CHEST1_COOLDOWN;
+
+                $data = [
+                    "chest1_time_remaining"=>$values[4],
+                    "chest1_rewards"=>$values[5],
+                    "chest1_count"=>$values[6],
+                ];
+
+                break;
+
+            case 2:
+
+                $values[7] = CHEST2_COOLDOWN;
+
+                $data = [
+                    "chest2_time_remaining"=>$values[7],
+                    "chest2_rewards"=>$values[8],
+                    "chest2_count"=>$values[9],
+                ];
+
+                break;
+
+            default: $data = ["please specify the rewardType"]; break;
+            
+        }
+
+        return self::success($data);
+
+    }
+
 }
 
 ?>

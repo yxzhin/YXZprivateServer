@@ -10,7 +10,7 @@ class Filter{
      
     }
 
-    public static function baseFilterInt(?int $var, int $min_range=0, int $max_range=2147483647): bool {
+    public static function baseFilterInt(int|string|null $var, int $min_range=0, int $max_range=2147483647): bool {
 
         $options = [ 
             "options"=>[
