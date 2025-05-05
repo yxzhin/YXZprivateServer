@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Хост: localhost
--- Время создания: Май 02 2025 г., 19:32
+-- Время создания: Май 05 2025 г., 12:49
 -- Версия сервера: 8.0.26-17
 -- Версия PHP: 7.3.33
 
@@ -111,7 +111,7 @@ CREATE TABLE `comments` (
   `accountID` int NOT NULL,
   `level_or_listID` int DEFAULT NULL,
   `comment` varchar(255) NOT NULL,
-  `likes` int NOT NULL,
+  `likes` int NOT NULL DEFAULT '0',
   `time` int NOT NULL,
   `percent` int DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=cp1251;

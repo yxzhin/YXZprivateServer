@@ -67,7 +67,7 @@ class Account{
         $roles = json_encode([DEFAULT_ROLE_ID]);
 
         //боже как же это красиво, я выйду за эту функцию
-        DBManager::baseInsert([
+        $data = [
             "accountID"=>$accountID,
             "userName"=>$userName,
             "gjp2"=>$gjp2,
@@ -78,7 +78,9 @@ class Account{
             "icons"=>$icons,
             "settings"=>$settings,
             "roles"=>$roles,
-        ], "accounts");
+        ];
+
+        DBManager::baseInsert($data, "accounts");
 
         $insertID = CONN->lastInsertId();
 
@@ -156,7 +158,8 @@ class Account{
 
     }
 
-    public static function activate(string $userName, string $password, int $verification_code): string {
+    public static function activate(string $userName, string $password,
+        int $verification_code): string|bool {
 
         // @TODO
 
@@ -194,7 +197,7 @@ class Account{
 
     }
 
-    public function backupAccount(string $save_data): string|bool {
+    public function backupAccount(string $save_data): string|int {
 
         if(empty($save_data))
         return ERROR_GENERIC;
@@ -223,7 +226,7 @@ class Account{
                 
                 } else {
 
-                    $data=[
+                    $data = [
                         "account_or_levelID"=>$accountID,
                         "save_data"=>$save_data,
                         "time"=>$time,
@@ -252,7 +255,7 @@ class Account{
 
     }
 
-    public function syncAccount(): string|bool {
+    public function syncAccount(): string {
 
         $accountID = $this->accountID;
 
@@ -297,6 +300,30 @@ class Account{
         Protector::log_(LOG_ACCOUNT_SYNC, $attrs);
 
         return $save_data;
+
+    }
+
+    public function uploadAccountComment(string $comment): string|int {
+
+        if(empty($comment)
+        || strlen($comment) > 140)
+        return ERROR_GENERIC;
+
+        $accountID = $this->accountID;
+        $comment = base64_decode(urldecode($comment));
+        $time = time();
+
+        $data = [
+            "accountID"=>$accountID,
+            "comment"=>$comment,
+            "time"=>$time,
+        ];
+
+        DBManager::baseInsert($data, "comments");
+
+        $insertID = CONN->lastInsertId();
+
+        return $insertID;
 
     }
 

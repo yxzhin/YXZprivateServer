@@ -134,7 +134,7 @@ class GDConnector{
 
         foreach($account_comments as $account_comment){
 
-            $comment = base64_encode($account_comment->comment);
+            $comment = urlencode(base64_encode($account_comment->comment));
             $likes = $account_comment->likes;
             $insertID = $account_comment->insertID;
             $time = Utils::getReadableTimeDifferenceFromUnixTimestamp($account_comment->time);

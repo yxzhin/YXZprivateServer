@@ -154,11 +154,8 @@ class JSONConnector{
         if($result < 0)
         return self::errorGeneric();
 
-        $time = time();
-
         $data = [
             "save_data_size"=>$result,
-            "time"=>$time,
         ];
 
         return self::success($data);
@@ -170,11 +167,21 @@ class JSONConnector{
         if($result < 0)
         return self::errorGeneric();
 
-        $time = time();
-
         $data = [
             "save_data"=>$result,
-            "time"=>$time,
+        ];
+
+        return self::success($data);
+
+    }
+
+    public static function uploadAccountComment(string|int $result): string {
+
+        if($result < 0)
+        return self::errorGeneric();
+
+        $data = [
+            "insertID"=>$result,
         ];
 
         return self::success($data);
