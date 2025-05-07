@@ -29,6 +29,9 @@ class GDConnector{
 
     public static function getAccountInfo(Account $account, bool $me): string {
 
+        if(!isset($account->accountID))
+        return ERROR_NOT_FOUND;
+
         $userName = $account->getPrefixedUserName();
         $rank = $account->getRank();
         $highest_role = $account->getHighestRole();
@@ -121,9 +124,6 @@ class GDConnector{
         if(!isset($account->accountID))
         return ERROR_NOT_FOUND;
 
-        if($page < 0)
-        return ERROR_GENERIC;
-
         $account_comments_array = $account->getAccountComments($page);
 
         $account_comments = $account_comments_array[0];
@@ -134,7 +134,7 @@ class GDConnector{
 
         foreach($account_comments as $account_comment){
 
-            $comment = urlencode(base64_encode($account_comment->comment));
+            $comment = base64_encode($account_comment->comment);
             $likes = $account_comment->likes;
             $insertID = $account_comment->insertID;
             $time = Utils::getReadableTimeDifferenceFromUnixTimestamp($account_comment->time);
@@ -185,11 +185,52 @@ class GDConnector{
 
         $rewards_string = join(":", $values);
 
-        $rewards_string_encrypted = urlencode(base64_encode(XORCipher::cipher($rewards_string, CHK_KEY_REWARDS)));
+        $rewards_string_encrypted = base64_encode(XORCipher::cipher($rewards_string, CHK_KEY_REWARDS));
 
         $rewards_hash = Encryptor::generateHash($rewards_string_encrypted, SALT_HASH_REWARDS);
 
         return $random_string.$rewards_string_encrypted."|".$rewards_hash;
+
+    }
+
+    public static function getMessages(Account $account, int $page, bool $sent_only=false): string {
+
+        $messages_array = $account->getMessages($page, $sent_only);
+
+        $messages = $messages_array[0];
+        $total_messages_count = $messages_array[1];
+        $offset = $page*10;
+        $sent_only = !$sent_only;
+
+        $messages_string = "";
+
+        foreach($messages as $message){
+
+            $data = [
+                $message->insertID,
+                $message->accountID,
+                $message->accountID,
+                base64_encode($message->title),
+                base64_encode(XORCipher::cipher($message->content, KEY_MESSAGE)),
+                $message->userName,
+                Utils::getReadableTimeDifferenceFromUnixTimestamp($message->time),
+                $message->is_new ? "0" : "1",
+                $sent_only,
+            ];
+
+            $message_data = "";
+            
+            for($x = 1; $x < count($data)+1; ++$x)
+            $message_data .= $x.":".$data[$x-1].":";
+
+            $messages_string .= $message_data."|";
+
+        }
+
+        $messages_string = substr($messages_string, 0, -1);
+        $messages_string .= "#{$total_messages_count}:{$offset}:10";
+
+        return $messages_string;
 
     }
 

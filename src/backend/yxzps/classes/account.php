@@ -110,7 +110,7 @@ class Account{
         return ERROR_GENERIC;
 
         if($accountID_passed
-        && !Filter::filterAccountID($accountID))
+        && !Filter::baseFilterInt($accountID))
         return ERROR_GENERIC;
 
         if(!$accountID_passed)
@@ -194,6 +194,50 @@ class Account{
         ":accountID"=>$accountID]);
 
         return $accountID;
+
+    }
+
+    public function getAccountComments(int $page): array {
+
+        $empty = array(array(), 0);
+
+        $account_comments = array();
+        $accountID = $this->accountID;
+        $offset = $page*10;
+
+        $query = CONN->prepare("SELECT count(*) FROM comments
+        WHERE accountID = :accountID
+        AND level_or_listID IS NULL");
+
+        $query->execute([":accountID"=>$accountID]);
+        $total_account_comments_count = $query->fetchColumn();
+
+        if($total_account_comments_count == 0)
+        return $empty;
+
+        $query = CONN->prepare("SELECT insertID FROM comments
+        WHERE accountID = :accountID
+        AND level_or_listID IS NULL
+        ORDER BY time DESC
+        LIMIT {$offset}, 10");
+
+        $query->execute([":accountID"=>$accountID]);
+        $raw_account_comments_ids = $query->fetchAll();
+
+        foreach($raw_account_comments_ids as $raw_account_comment_id){
+
+            $account_comment_id = $raw_account_comment_id["insertID"]; 
+            $account_comment = new Comment();
+            $account_comment->load($account_comment_id);
+
+            if(!isset($account_comment->comment))
+            continue;
+
+            array_push($account_comments, $account_comment);
+
+        }
+
+        return array($account_comments, $total_account_comments_count);
 
     }
 
@@ -305,12 +349,13 @@ class Account{
 
     public function uploadAccountComment(string $comment): string|int {
 
+        $comment = base64_decode(urldecode($comment));
+
         if(empty($comment)
         || strlen($comment) > 140)
         return ERROR_GENERIC;
 
         $accountID = $this->accountID;
-        $comment = base64_decode(urldecode($comment));
         $time = time();
 
         $data = [
@@ -324,6 +369,50 @@ class Account{
         $insertID = CONN->lastInsertId();
 
         return $insertID;
+
+    }
+
+    public function getMessages(int $page, bool $sent_only=false): array {
+
+        $empty = array(array(), 0);
+
+        $messages = array();
+        $accountID = $this->accountID;
+        $offset = $page*10;
+
+        $column = $sent_only ? "accountID" : "target_accountID";
+
+        $query = CONN->prepare("SELECT count(*) FROM messages
+        WHERE {$column} = :accountID");
+
+        $query->execute([":accountID"=>$accountID]);
+        $total_messages_count = $query->fetchColumn();
+
+        if($total_messages_count == 0)
+        return $empty;
+
+        $query = CONN->prepare("SELECT insertID FROM messages
+        WHERE {$column} = :accountID
+        ORDER BY time DESC
+        LIMIT {$offset}, 10");
+
+        $query->execute([":accountID"=>$accountID]);
+        $raw_messages_ids = $query->fetchAll();
+
+        foreach($raw_messages_ids as $raw_message_id){
+
+            $message_id = $raw_message_id["insertID"]; 
+            $message = new Message();
+            $message->load($message_id);
+
+            if(!isset($message->content))
+            continue;
+
+            array_push($messages, $message);
+
+        }
+
+        return array($messages, $total_messages_count);
 
     }
 
@@ -432,50 +521,6 @@ class Account{
         $counts = $query->fetch(PDO::FETCH_ASSOC);
 
         return $counts;
-
-    }
-
-    public function getAccountComments(int $page): array {
-
-        $empty = array(array(), 0);
-
-        if($page < 0)
-        return $empty;
-
-        $account_comments = array();
-        $accountID = $this->accountID;
-        $offset = $page*10;
-
-        $query = CONN->prepare("SELECT count(*) FROM comments
-        WHERE accountID = :accountID
-        AND level_or_listID IS NULL");
-
-        $query->execute([":accountID"=>$accountID]);
-        $total_account_comments_count = $query->fetchColumn();
-
-        if($total_account_comments_count == 0)
-        return $empty;
-
-        $query = CONN->prepare("SELECT insertID FROM comments
-        WHERE accountID = :accountID
-        AND level_or_listID IS NULL
-        ORDER BY time DESC
-        LIMIT {$offset}, 10");
-
-        $query->execute([":accountID"=>$accountID]);
-        $raw_account_comments_ids = $query->fetchAll();
-
-        foreach($raw_account_comments_ids as $raw_account_comment_id){
-
-            $account_comment_id = $raw_account_comment_id["insertID"]; 
-            $account_comment = new Comment();
-            $account_comment->load($account_comment_id);
-
-            array_push($account_comments, $account_comment);
-
-        }
-
-        return array($account_comments, $total_account_comments_count);
 
     }
 

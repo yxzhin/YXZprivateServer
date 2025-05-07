@@ -5,6 +5,8 @@ define("SALT_HASH_REWARDS", "pC26fpYaQCtg");
 
 define("CHK_KEY_REWARDS", 59182);
 
+define("KEY_MESSAGE", 14251);
+
 class Encryptor{
 
     public static function generateGJP2(string $password): string {

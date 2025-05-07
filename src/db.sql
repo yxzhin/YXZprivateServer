@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Хост: localhost
--- Время создания: Май 05 2025 г., 12:49
+-- Время создания: Май 07 2025 г., 15:04
 -- Версия сервера: 8.0.26-17
 -- Версия PHP: 7.3.33
 
@@ -169,6 +169,7 @@ CREATE TABLE `messages` (
   `insertID` int NOT NULL,
   `accountID` int NOT NULL,
   `target_accountID` int NOT NULL,
+  `userName` varchar(20) CHARACTER SET cp1251 COLLATE cp1251_general_ci NOT NULL,
   `title` varchar(255) NOT NULL,
   `content` varchar(255) NOT NULL,
   `time` int NOT NULL,

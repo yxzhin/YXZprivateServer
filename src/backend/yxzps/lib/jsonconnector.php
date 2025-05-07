@@ -113,9 +113,6 @@ class JSONConnector{
 
         if(!isset($account->accountID))
         return self::notFound(["accountID"=>null]);
-        
-        if($page < 0)
-        return self::errorGeneric();
 
         $account_comments_array = $account->getAccountComments($page);
 
@@ -220,6 +217,46 @@ class JSONConnector{
 
             default: $data = ["please specify the rewardType"]; break;
             
+        }
+
+        return self::success($data);
+
+    }
+
+    public static function getMessages(Account $account, int $page, bool $sent_only=false): string {
+
+        $messages_array = $account->getMessages($page, $sent_only);
+
+        $messages = $messages_array[0];
+        $total_messages_count = $messages_array[1];
+
+        $data = [
+            "total_messages_count"=>$total_messages_count,
+            "page"=>$page,
+            "messages"=>array(),
+        ];
+
+        foreach($messages as $message){
+
+            $accountID = $message->accountID;
+            $userName = $message->userName;
+            $title = $message->title;
+            $content = $message->content;
+            $upload_time = Utils::getReadableTimeDifferenceFromUnixTimestamp($message->time);
+            $is_new = $message->is_new;
+            $insertID = $message->insertID;
+
+            $message_data = [
+                "accountID"=>$accountID,
+                "userName"=>$userName,
+                "title"=>$title,
+                "content"=>$content,
+                "upload_time"=>$upload_time,
+                "is_new"=>$is_new,
+            ];
+
+            $data["messages"][$insertID] = $message_data;
+
         }
 
         return self::success($data);

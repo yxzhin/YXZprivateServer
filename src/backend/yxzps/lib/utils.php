@@ -25,7 +25,7 @@ class Utils{
         $days = $delta->d > 0 ? $delta->d." days, " : "";
         $hours = $delta->h > 0 ? $delta->h." hours, " : "";
         $minutes = $delta->i > 0 ? $delta->i." minutes, " : "";
-        $seconds = $delta->s." seconds ";
+        $seconds = $delta->s." seconds";
 
         $diff = $years.$months.$days.$hours.$minutes.$seconds;
         if($add_ago) $diff .= " ago";

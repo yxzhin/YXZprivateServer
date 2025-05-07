@@ -9,8 +9,13 @@ die(JSON ?
 JSONConnector::errorGeneric() :
 ERROR_GENERIC);
 
+if(!isset($_POST["page"])
+|| !Filter::baseFilterInt($_POST["page"]))
+die($error_generic);
+
+$page = $_POST["page"];
+
 $accountID = $_POST["accountID"] ?? null;
-$page = $_POST["page"] ?? null;
 
 $account = new Account();
 $account->load($accountID);
