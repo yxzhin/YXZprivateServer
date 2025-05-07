@@ -206,15 +206,23 @@ class GDConnector{
 
         foreach($messages as $message){
 
+            $insertID = $message->insertID;
+            $accountID = $sent_only ? $message->target_accountID : $message->accountID;
+            $title = base64_encode($message->title);
+            $content = base64_encode(XORCipher::cipher($message->content, KEY_MESSAGE));
+            $userName = DBManager::baseSelect(["userName"], "accounts", "accountID", $accountID);
+            $time = Utils::getReadableTimeDifferenceFromUnixTimestamp($message->time);
+            $is_new = $message->is_new ? "0" : "1";
+
             $data = [
-                $message->insertID,
-                $message->accountID,
-                $message->accountID,
-                base64_encode($message->title),
-                base64_encode(XORCipher::cipher($message->content, KEY_MESSAGE)),
-                $message->userName,
-                Utils::getReadableTimeDifferenceFromUnixTimestamp($message->time),
-                $message->is_new ? "0" : "1",
+                $insertID,
+                $accountID,
+                $accountID,
+                $title,
+                $content,
+                $userName,
+                $time,
+                $is_new,
                 $sent_only,
             ];
 

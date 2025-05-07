@@ -5,7 +5,6 @@ class Message{
     public int $insertID;
     public int $accountID;
     public int $target_accountID;
-    public string $userName;
     public string $title;
     public string $content;
     public int $time;
@@ -21,7 +20,6 @@ class Message{
         $this->insertID = $insertID;
         $this->accountID = $data["accountID"];
         $this->target_accountID = $data["target_accountID"];
-        $this->userName = $data["userName"];
         $this->title = $data["title"];
         $this->content = $data["content"];
         $this->time = $data["time"];

@@ -238,8 +238,9 @@ class JSONConnector{
 
         foreach($messages as $message){
 
-            $accountID = $message->accountID;
-            $userName = $message->userName;
+            $to_or_from = $sent_only ? "to" : "from";
+            $accountID = $sent_only ? $message->target_accountID : $message->accountID;
+            $userName = DBManager::baseSelect(["userName"], "accounts", "accountID", $accountID);
             $title = $message->title;
             $content = $message->content;
             $upload_time = Utils::getReadableTimeDifferenceFromUnixTimestamp($message->time);
@@ -247,8 +248,8 @@ class JSONConnector{
             $insertID = $message->insertID;
 
             $message_data = [
-                "accountID"=>$accountID,
-                "userName"=>$userName,
+                "{$to_or_from}_accountID"=>$accountID,
+                "{$to_or_from}_userName"=>$userName,
                 "title"=>$title,
                 "content"=>$content,
                 "upload_time"=>$upload_time,
